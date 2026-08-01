@@ -69,6 +69,7 @@ model Workspace {
 
 model Conversation {
     id          String @id @default(cuid())
+    title       String
     workspaceId String
 
     messages Message[]
@@ -90,8 +91,10 @@ model Message {
 
     conversationId  String
     senderType      senderType
-    senderEmail     String?
+    senderName      String?
     sentAt          DateTime @default(now())
+
+    dashboards      Dashboard[]
 
     conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
@@ -108,9 +111,11 @@ model Dashboard {
     charts  Json[]
 
     workspaceId String
+    messageId   String?
     createdAt   DateTime @default(now())
 
     workspaceDashboard Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade) 
+    message Message? @relation(fields: [messageId], references: [id])
 }
 
 model FileUpload {

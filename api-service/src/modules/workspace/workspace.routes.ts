@@ -6,7 +6,9 @@ import {
     createWorkspaceHandler,
     getWorkspaceMembersHandler,
     updateWorkspaceMemberHandler,
-    delWorkspaceMemberHandler
+    delWorkspaceMemberHandler,
+    joinWorkspaceHandler
+    
 } from "./workspace.controllers"
 
 export const workspaceRouter = Router()
@@ -18,4 +20,5 @@ workspaceRouter.post("/invite", sendInviteEmailHandler)
 workspaceRouter.get("/:workspaceId/members", getWorkspaceMembersHandler)
 workspaceRouter.put("/users", updateWorkspaceMemberHandler)
 workspaceRouter.get("/users/delete", delWorkspaceMemberHandler)
+workspaceRouter.post("/workspace/:workspaceId/join", joinWorkspaceHandler)
 

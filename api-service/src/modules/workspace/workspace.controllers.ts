@@ -6,14 +6,15 @@ import { workRole, userStatus } from "../../types/enums.js"
 
 import {
     sendInviteEmail,
-    getValidUser,
+    getUserDataByEmail, 
     userInWorkspace,
     delWorkspace,
     updateWorkSpace,
     createWorkspace,
     getWorkspaceMembers,
     delWorkspaceMember,
-    updateWorkspaceMember
+    updateWorkspaceMember,
+    joinWorkspace
 
 } from "./workspace.services.js"
 
@@ -41,8 +42,6 @@ export const sendInviteEmailHandler = asyncHandler(async (req:Request, res:Respo
         inviterName
     } = req.body
 
-    const { id } = req.user as {id:string}
-
     if(!email || !role || !workspaceId || !workspaceName){
         throw new ApiError(400,"email, role, workspaceId and workspaceName are required")
     }
@@ -51,20 +50,39 @@ export const sendInviteEmailHandler = asyncHandler(async (req:Request, res:Respo
         throw new ApiError(400, "Invalid role provided")
     }
 
-    if(!await getValidUser(email)){
-        throw new ApiError(404, `User with email ${email} does not exist or has not verified their email`)
+    const user = await getUserDataByEmail(email)
+
+    if(!user || !user.emailVeriified){
+        throw new ApiError(404,`User with ${email} has not verified their email or no user exists with the email`)
     }
 
-    if(await userInWorkspace(id, workspaceId)){
-        throw new ApiError(400, `User with email ${email} is already a member of this workspace`)
+    const { id, workspaceRoles } = user
+    const status = userInWorkspace(workspaceRoles as { workRole:workRole, workspaceId:string }[], workspaceId, role)
+
+    switch(status){
+        case("PRESENT_WITH_CURR_ROLE"):
+            throw new ApiError(400, `${email} user is already present in workspace`)
+        
+        case("PRESENT_WITH_DIFF_ROLE"):
+            throw new ApiError(400, `${email} present in workspace with role: ${role}`)
     }
 
-    const url = `${req.protocol}://${req.get("host")}/workspace/${workspaceId}/join`
+    const url = `${req.protocol}://${req.get("host")}/workspace/${workspaceId}/join/?userId=${id}&role=${role}`
     await sendInviteEmail(inviterName, email, role, workspaceName, url)
 
     return res.status(200).json(
         new ApiResponse(200, null, `Invitation email sent to ${email}`)
     )
+})
+
+
+export const joinWorkspaceHandler = asyncHandler(async (req:Request, res:Response)=>{
+    const { workspaceId } = req.params as { workspaceId: string }
+    const { userId, role } = req.query as { userId:string, role:workRole}
+
+    const joined = await joinWorkspace(workspaceId, userId, role)
+
+    return res.json( new ApiResponse(200, `Successfully joined workspace`))
 })
 
 

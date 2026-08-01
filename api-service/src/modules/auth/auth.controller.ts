@@ -13,7 +13,8 @@ import {
     updateAuthData, authData,
     verifyEmail,
     deleteTokensFromCache,
-    validateRefreshToken
+    validateRefreshToken,
+    sendVerifyEmail
 
 } from "./auth.services.js"
 
@@ -41,7 +42,7 @@ export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
     const { refreshToken, accessToken} = saveToken
     const { id, emailVeriified } = newUser
 
-    return res.status(200).json(
+    res.status(200).json(
         new ApiResponse(200, {
             user:{
                 id, 
@@ -54,6 +55,11 @@ export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
             
         }, "Registration successful! Welcome to your workspace.")
     )
+
+    const url = `${req.protocol}://${req.get("host")}/verify-email?token=unHashedTempToken`
+    await sendVerifyEmail(email,name, url)
+
+    return
 })
 
 
