@@ -9,3 +9,8 @@ export enum workRole {
     VIEWER = "Viewer"
 }
 
+export enum messageSender {
+    AI = "Ai",
+    USER = "User"
+}
+

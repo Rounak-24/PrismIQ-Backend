@@ -1,0 +1,1 @@
+export const KAFKA_QUERY_TOPIC = "KAFKA_QUERY_TOPIC"

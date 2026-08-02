@@ -1,5 +1,6 @@
 import { app } from "./app.js"
 import { createServer } from "http"
+import { startMessageConsumer } from "./services/kafkaConsumer.services.js"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -17,6 +18,9 @@ async function init() {
         httpServer.listen(port,()=>{
             console.log(`API Server is listening on port ${port}`)
         })
+
+        startMessageConsumer()
+        
 
     }catch(err){
         console.log(`Error occured while starting server, ${err}`)

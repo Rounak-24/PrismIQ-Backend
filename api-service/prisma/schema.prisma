@@ -81,8 +81,8 @@ model Conversation {
 }
 
 enum senderType {
-    USER
-    AI
+    User
+    Ai
 }
 
 model Message {
