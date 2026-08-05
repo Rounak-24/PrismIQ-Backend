@@ -1,0 +1,96 @@
+from app.agents.sql_agent.utils.state import GraphState
+from app.agents.sql_agent.prompts.sql_agent_prompt import sql_agent_prompt
+from app.agents.sql_agent.agent import sql_planner_llm
+from app.services.dataset_services import execute_dataset_query
+from app.services.analytics_services import get_org_db_schema, execute_sql_in_db
+from langchain.messages import SystemMessage, HumanMessage
+
+
+kpi_store = [
+    "CTR",
+    "Conversion_Rate",
+    "CPC",
+    "CPA",
+    "ROAS",
+    "CPM",
+    "Total_Revenue",
+    "Total_Spend",
+    "Total_Conversions"
+]
+
+
+async def get_schema_context(state:GraphState):
+
+    if(state["data_source"]=="workspace"):
+        state["schema_context"] = await get_org_db_schema()
+
+    return state
+
+async def plan_query(state:GraphState):
+
+    system_prompt = sql_agent_prompt
+    user_prompt = f""" 
+        DATASET SCHEMA: {state["schema_context"]}
+        USER QUESTION: {state["user_question"]}
+        KPI STORE: {kpi_store}
+    """
+
+    response = await sql_planner_llm.ainvoke(
+        [
+            SystemMessage(
+                content = system_prompt
+            ),
+            HumanMessage(
+                content =  user_prompt
+            )
+        ]
+    )
+
+    state["intent"] = response.intent
+    state["confidence"] = response.confidence
+
+    state["main_sql"] = response.mainSql
+    state["kpi_sql"] = response.kpiSql
+
+    state["kpi_config"] = [
+        kpi.model_dump()
+        for kpi in response.kpis
+    ],
+
+    state["chart_config"] = response.chart.model_dump(),
+    state["insight_focus"] = response.insightFocus,
+    state["follow_up_questions"] = response.followUpQuestions,
+    state["execution_error"] = response.error
+
+    return state
+
+async def execute_sql(state:GraphState):
+    data_source = state.get("data_source")
+    kpi_sql = state.get("kpi_sql")
+    main_sql = state.get("main_sql")
+    dataset_id = state.get("dataset_id")
+
+    main_sql_result = None
+    kpi_result = None
+
+    try:
+
+        if data_source=="uploaded_dataset":
+
+            if (main_sql!=None):
+                main_sql_result = await execute_dataset_query(dataset_id,main_sql)
+            if (kpi_sql!=None):
+                kpi_result = await execute_dataset_query(dataset_id,kpi_sql)
+
+        else:
+
+            if (main_sql!=None):
+                main_sql_result = await execute_sql_in_db(main_sql)
+            if (kpi_sql!=None):
+                kpi_result = await execute_sql_in_db(kpi_sql)
+
+        state["sql_query_result"] = main_sql_result
+        state["kpi_result"] = kpi_result
+
+    except Exception as e:
+        print("Error occured in execute_sql node", e)

@@ -1,0 +1,15 @@
+name: "prism-bi-backend-ai-service-dev"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: AI-service-redis-store
+    ports:
+      - "6379:6379"
+    command: ["redis-server","--appendonly","yes"]
+    volumes:
+      - redis-data:/data
+
+
+volumes:
+  redis-data:
