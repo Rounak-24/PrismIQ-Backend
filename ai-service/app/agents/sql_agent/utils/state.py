@@ -8,7 +8,6 @@ class GraphState(TypedDict):
         "uploaded_dataset"
     ]
 
-    local_file_path: str | None
     dataset_id: str | None
     schema_context: str
 
@@ -25,6 +24,7 @@ class GraphState(TypedDict):
 
     insight_focus: list[str]
     follow_up_questions: list[str]
+    analysisDescription: str | None
 
     planner_error: str | None
 

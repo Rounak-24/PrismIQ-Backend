@@ -42,3 +42,4 @@ class PlannerResponse(BaseModel):
     insightFocus: list[str] = []
     followUpQuestions: list[str] = []
     error: str | None = None
+    analysisDescription: str | None

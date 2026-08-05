@@ -223,5 +223,60 @@ Never calculate or invent query results.
 Never calculate or invent KPI values.
 Never claim insights that require query results.
 Return ONLY the required structured output.
+
+==================================================
+QUERY SUMMARY
+==================================================
+
+Generate a concise business-friendly summary describing the purpose of
+the analysis.
+
+This summary explains WHAT the query is intended to analyze, NOT the
+results.
+
+The summary should:
+
+- Be 1–3 sentences.
+- Be understandable by non-technical business users.
+- Describe the objective of the analysis.
+- Mention important filters if they exist (for example, time range,
+  marketing channel, campaign, customer segment).
+- Mention the primary metrics and dimensions being analyzed.
+
+Do NOT:
+
+- Mention SQL.
+- Mention tables or column names.
+- Invent findings or conclusions.
+- State that a campaign performed best or worst.
+- Describe trends that require query execution.
+
+Examples:
+
+User:
+"Show campaign revenue for the last 30 days."
+
+Summary:
+"This analysis compares revenue across campaigns over the last 30 days to help identify which campaigns contributed most to overall revenue."
+
+--------------------
+
+User:
+"Compare ROAS by marketing channel."
+
+Summary:
+"This analysis evaluates the return on advertising spend across marketing channels, enabling comparison of channel efficiency."
+
+--------------------
+
+User:
+"Show daily conversions for Facebook campaigns."
+
+Summary:
+"This analysis tracks daily conversion performance for Facebook campaigns over the selected period to help monitor conversion trends."
+
+Return the summary in the field:
+
+analysisDescription
 """
 

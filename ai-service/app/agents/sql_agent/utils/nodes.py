@@ -1,4 +1,5 @@
 from app.agents.sql_agent.utils.state import GraphState
+from app.agents.sql_agent.utils.models import PlannerResponse
 from app.agents.sql_agent.prompts.sql_agent_prompt import sql_agent_prompt
 from app.agents.sql_agent.agent import sql_planner_llm
 from app.services.dataset_services import execute_dataset_query
@@ -30,39 +31,44 @@ async def plan_query(state:GraphState):
 
     system_prompt = sql_agent_prompt
     user_prompt = f""" 
-        DATASET SCHEMA: {state["schema_context"]}
-        USER QUESTION: {state["user_question"]}
+        DATASET SCHEMA: {state.get("schema_context")}
+        USER QUESTION: {state.get("user_question")}
         KPI STORE: {kpi_store}
     """
 
-    response = await sql_planner_llm.ainvoke(
-        [
-            SystemMessage(
-                content = system_prompt
-            ),
-            HumanMessage(
-                content =  user_prompt
-            )
-        ]
-    )
+    try:
+        response:PlannerResponse = await sql_planner_llm.ainvoke(
+            [
+                SystemMessage(
+                    content = system_prompt
+                ),
+                HumanMessage(
+                    content =  user_prompt
+                )
+            ]
+        )
 
-    state["intent"] = response.intent
-    state["confidence"] = response.confidence
+        state["intent"] = response.intent
+        state["confidence"] = response.confidence
 
-    state["main_sql"] = response.mainSql
-    state["kpi_sql"] = response.kpiSql
+        state["main_sql"] = response.mainSql
+        state["kpi_sql"] = response.kpiSql
 
-    state["kpi_config"] = [
-        kpi.model_dump()
-        for kpi in response.kpis
-    ],
+        state["kpi_config"] = [
+            kpi.model_dump()
+            for kpi in response.kpis
+        ],
 
-    state["chart_config"] = response.chart.model_dump(),
-    state["insight_focus"] = response.insightFocus,
-    state["follow_up_questions"] = response.followUpQuestions,
-    state["execution_error"] = response.error
+        state["chart_config"] = response.chart.model_dump(),
+        state["insight_focus"] = response.insightFocus,
+        state["follow_up_questions"] = response.followUpQuestions,
+        state["execution_error"] = response.error
+        state["analysisDescription"] = response.analysisDescription
 
-    return state
+        return state
+
+    except Exception as e:
+        print("Error occured in plan_query node", e)
 
 async def execute_sql(state:GraphState):
     data_source = state.get("data_source")

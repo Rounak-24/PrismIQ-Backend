@@ -1,13 +1,30 @@
 from bullmq import Queue
-from app.config.redis import redis
-from services.socket import QueryPayload
+from os import getenv
+from dotenv import load_dotenv
+load_dotenv()
+from pydantic import BaseModel
+from typing import Literal
 
 QUERY_QUEUE = "QUERY_QUEUE"
 QUERY_PROCESS_JOB = "QUERY_PROCESS_JOB"
+REDIS_URL = getenv("REDIS_URL")
 
-query_queue = Queue(QUERY_QUEUE, { "connection": redis})
 
-async def add_query_to_queue(data:QueryPayload):
+class QueueJobData(BaseModel):
+    session_id: str
+    data_source: Literal[
+        "workspace",
+        "uploaded_dataset"
+    ]
+
+    dataset_id: str | None
+    schema_context: str | None
+    user_question: str
+
+
+query_queue = Queue(QUERY_QUEUE, { "connection": REDIS_URL or "redis://localhost:6379"})
+
+async def add_query_to_queue(data:QueueJobData):
     try:
         job = await query_queue.add(QUERY_PROCESS_JOB, data)
         print(f"{QUERY_PROCESS_JOB} added to queue, job_id:{job.id}")

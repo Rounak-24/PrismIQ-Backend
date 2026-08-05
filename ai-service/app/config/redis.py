@@ -3,6 +3,8 @@ from redis import Redis
 from os import getenv
 load_dotenv()
 
+REDIS_URL = getenv("REDIS_URL")
+
 redis = Redis(
     host = "localhost",
     port = 6379
