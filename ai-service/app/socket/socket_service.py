@@ -1,9 +1,7 @@
 import socketio
-from datetime import datetime
-from app.models.response_model import QueryPayload
 from app.models.socket_data_model import SocketData
-from app.queues.query.query_queue import add_query_to_queue
 from app.socket.hanlders.chat import send_message_handler
+from app.socket.hanlders.connection_handlers import join_session_handler, leave_session_handler
 
 
 class SockerService:
@@ -23,19 +21,16 @@ class SockerService:
         async def disconnect():
             print("connected to socketio Server")
 
+
         @self.sio.on("join_session")
-        async def join_session_handler(sid, data):
-            session_id = data.get("sessionId")
+        async def join_session(sid, data):
+            await join_session_handler(self.sio, data, sid)
 
-            if not session_id:
-                print(f"join_session failed: Missing sessionId from {sid}")
-                self.sio.emit("error", {
-                    "message":f"join_session failed: Missing sessionId from {sid}"
-                })
-                return
 
-            self.sio.enter_room(sid, room = session_id)
-            print(f"Client {sid} joined room: {session_id}")
+        @self.sio.on("leave_session")
+        async def leave_session(sid, data):
+            await leave_session_handler(self.sio, data, sid)
+
 
         @self.sio.on("send_message")
         async def send_message(sid, data:SocketData):

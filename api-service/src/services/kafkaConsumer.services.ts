@@ -1,6 +1,6 @@
 import { kafka } from "../config/kafka"
 import { KAFKA_QUERY_TOPIC } from "../types/constants"
-import { type IQueryPayload } from "../types/interfaces"
+import { type IMessage } from "../types/interfaces"
 import { saveMessage } from "../modules/message/message.services"
 
 export const startMessageConsumer = async ()=>{
@@ -22,10 +22,10 @@ export const startMessageConsumer = async ()=>{
 
             try{
                 const msgValue = message.value.toString()
-                const payloadObj:IQueryPayload = JSON.parse(msgValue)
-                console.log(payloadObj)
+                const messageData:IMessage = JSON.parse(msgValue)
+                console.log(messageData)
 
-                const isSaved = await saveMessage(payloadObj)
+                const isSaved = await saveMessage(messageData)
                 if(!isSaved) throw Error("Something went wrong while saving msg in DB")
 
             }catch(err){

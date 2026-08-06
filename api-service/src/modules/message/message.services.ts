@@ -1,30 +1,24 @@
 import { prisma } from "../../config/prisma"
-import {type IQueryPayload} from "../../types/interfaces"
-import { messageSender } from '../../types/enums'
+import type { IMessage } from "../../types/interfaces";
 
-export const saveMessage = async(payload:IQueryPayload)=>{
-    const { sessionId, senderName, sentAt, aiResponse, query } = payload
-    const aiResponseObj = JSON.parse(aiResponse)
 
-    await prisma.message.createMany({
-        data:[
-            {
-                conversationId: sessionId,
-                content: query,
-                senderType: messageSender.USER,
-                sentAt: sentAt,
-                senderName: senderName
-            },
-            {
-                conversationId: sessionId,
-                content: aiResponse,
-                senderType: messageSender.AI,
-                sentAt: sentAt,
-                senderName:"AI Agent",
-                dashboards: ("dashboard" in aiResponseObj) ? [aiResponseObj.dashboard] : null
-            }
-        ]
+export const saveMessage = async (data:IMessage)=>{
+    const dashboard = (data.dashboard) ? data.dashboard : null
+    const content = (data.content) ? data.content : null
+    const senderName = data.senderName ?? null
+
+    const savedMessage = await prisma.message.create({
+        data:{
+            conversationId: data.sessionId,
+            content: content,
+            senderType: data.senderType,
+            senderName: senderName,
+            sentAt: data.sentAt,
+            dashboards: dashboard ?? []
+        }
     })
 
-    return true
+    console.log(savedMessage)
+    if (savedMessage) return true
+    else return false
 }

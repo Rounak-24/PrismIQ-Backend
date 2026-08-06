@@ -3,9 +3,14 @@ from app.services.dataset_services import download_and_dump
 from app.models.response_model import AiResponse
 from app.models.socket_data_model import SocketData
 from app.services.pubsub import publish_user_message
+from app.config.redis import redis
 from app.utils.serialize_data import serialize_SocketData_to_MessageModel
 from typing import Literal
 import socketio
+
+
+def getKey(session_id:str):
+    return f"{session_id}:dataset_id"
 
 
 async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
@@ -32,7 +37,12 @@ async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
     message_data = serialize_SocketData_to_MessageModel(data)
     await publish_user_message(message_data)
 
-    dumped_file_data = await download_and_dump(supabase_file_path) if data_source == "supabase_file" else None
+    dumped_file_data = None
+
+    if data_source == "supabase_file" and supabase_file_path:
+        dumped_file_data = await download_and_dump(supabase_file_path) if data_source == "supabase_file" else None
+        await redis.set(getKey(session_id), dumped_file_data.get("dataset_id"))
+
 
     job_data = QueueJobData(
         session_id=session_id,

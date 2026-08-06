@@ -106,5 +106,21 @@ async def execute_dataset_query(dataset_id:str, sql:str):
     finally:
         if connection:
             connection.close()
+
+
+async def download_and_dump(supabase_file_path:str)-> DumpedDBoutput:
+    from app.services.supabase_services import download_file
+
+    local_filepath = await download_file(supabase_file_path)
+    dumped_data = await dump_file_to_db(local_filepath)
+
+    return dumped_data
+
+
+async def delete_dataset(dataset_id:str):
+    db_dir = "./data/datasets"
+    dataset_path = os.path.join(db_dir, f"{dataset_id}.duckdb")
+
+    await os.remove(dataset_path)
     
         

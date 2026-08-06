@@ -1,4 +1,5 @@
 import fs from "fs"
+import crypto from "crypto"
 import { prisma } from "../../config/prisma"
 import { env } from "node:process"
 import { supabase } from "../../config/supabase"
@@ -8,9 +9,12 @@ export const uploadFileToSupabase = async (file:Express.Multer.File, workspaceId
         const localFilapath = file.path
         if (!localFilapath) throw Error("Filepath is missing")
 
-        const bucket = env.SUPABASE_BUCKET as string
-        const supabaseFileName = `workspace-${workspaceId}/${file.filename}`
+        const originalFilename = file.filename.split("-")[0]
+        const supabaseId = crypto.randomUUID()
+        const supabaseFileName = `workspace-${workspaceId}/${supabaseId}-${originalFilename}`
+
         const fileBuffer = fs.readFileSync(localFilapath)
+        const bucket = env.SUPABASE_BUCKET as string
         
         const { data, error } = await supabase.storage
             .from(bucket)
@@ -23,12 +27,8 @@ export const uploadFileToSupabase = async (file:Express.Multer.File, workspaceId
             console.log(error)
             throw Error("Error occured while file uploading in Supabase")
         } else fs.unlinkSync(localFilapath)
-
-        const urldata = supabase.storage
-            .from(bucket)
-            .getPublicUrl(data.path)
-        
-        return urldata.data.publicUrl         
+        console.log(data.path)
+        return data        
         
     } catch (err){
         console.log(`Error occured for uploading file`, err)
@@ -38,7 +38,7 @@ export const uploadFileToSupabase = async (file:Express.Multer.File, workspaceId
 
 
 export const createUpload = async (file:Express.Multer.File, 
-    {workspaceId, fullname, publicURL}:  {workspaceId:string, fullname:string, publicURL: string}
+    {workspaceId, fullname, supabaseFilePath}:  {workspaceId:string, fullname:string, supabaseFilePath: string}
 )=>{
     const newUpload = await prisma.fileUpload.create({
         data:{
@@ -47,7 +47,7 @@ export const createUpload = async (file:Express.Multer.File,
             format: file.mimetype,
             workspaceId: workspaceId,
             uploadedBy: fullname,
-            publicURL
+            supabaseFilePath
         }
     })
 
