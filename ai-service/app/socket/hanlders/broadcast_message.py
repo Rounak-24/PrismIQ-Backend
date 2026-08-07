@@ -1,7 +1,6 @@
 import socketio
 from app.models.message_model import MessageModel
 
-
 async def broadcast_ai_response(sio:socketio.AsyncServer, response:MessageModel):
     try:
         ai_response = response
