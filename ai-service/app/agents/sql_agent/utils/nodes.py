@@ -19,13 +19,14 @@ kpi_store = [
     "Total_Conversions"
 ]
 
-
 async def get_schema_context(state:GraphState):
+    data_source = state.get("data_source")
+    if data_source is "workspace":
+        schema_context = await get_org_db_schema()
 
-    if(state["data_source"]=="workspace"):
-        state["schema_context"] = await get_org_db_schema()
+        return { **state, "schema_context": schema_context}
 
-    return state
+    else: return state
 
 async def plan_query(state:GraphState):
 
@@ -48,24 +49,25 @@ async def plan_query(state:GraphState):
             ]
         )
 
-        state["intent"] = response.intent
-        state["confidence"] = response.confidence
+        return {
+            **state,
+            "intent": response.intent,
+            "confidence": response.confidence,
 
-        state["main_sql"] = response.mainSql
-        state["kpi_sql"] = response.kpiSql
+            "main_sql": response.mainSql,
+            "kpi_sql": response.kpiSql,
 
-        state["kpi_config"] = [
-            kpi.model_dump()
-            for kpi in response.kpis
-        ],
+            "kpi_config": [
+                kpi.model_dump()
+                for kpi in response.kpis
+            ],
 
-        state["chart_config"] = response.chart.model_dump(),
-        state["insight_focus"] = response.insightFocus,
-        state["follow_up_questions"] = response.followUpQuestions,
-        state["execution_error"] = response.error
-        state["analysisDescription"] = response.analysisDescription
-
-        return state
+            "chart_config": response.chart.model_dump(),
+            "insight_focus": response.insightFocus,
+            "follow_up_questions": response.followUpQuestions,
+            "execution_error": response.error,
+            "analysisDescription": response.analysisDescription
+        }
 
     except Exception as e:
         print("Error occured in plan_query node", e)
@@ -95,8 +97,11 @@ async def execute_sql(state:GraphState):
             if (kpi_sql!=None):
                 kpi_result = await execute_sql_in_db(kpi_sql)
 
-        state["sql_query_result"] = main_sql_result
-        state["kpi_result"] = kpi_result
+        return {
+            **state,
+            "sql_query_result": main_sql_result,
+            "kpi_result": kpi_result
+        }
 
     except Exception as e:
         print("Error occured in execute_sql node", e)

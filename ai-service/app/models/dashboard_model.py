@@ -19,3 +19,4 @@ class DashboardModel(BaseModel):
     insightFocus: list[str] = []
     kpis: list[dict] = []
     chart: ChartConfig
+    follow_up_questions: list[str]

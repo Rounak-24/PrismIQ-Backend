@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from redis import Redis
+from redis.asyncio import Redis
 from os import getenv
 load_dotenv()
 

@@ -7,7 +7,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from app.agents.sql_agent.utils.nodes import get_schema_context, plan_query, execute_sql
 
 llm = ChatGoogleGenerativeAI(
     model = "gemini-3.6-flash",
@@ -19,13 +18,14 @@ sql_planner_llm = llm.with_structured_output(
     schema = PlannerResponse
 )
 
+
+from app.agents.sql_agent.utils.nodes import plan_query, execute_sql, get_schema_context
+
 agent_builder = StateGraph(GraphState)
 
-
-agent_builder.add_node("get_schema_context",get_schema_context)
+agent_builder.add_node("get_schema_context", get_schema_context)
 agent_builder.add_node("plan_query",plan_query)
 agent_builder.add_node("execute_sql",execute_sql)
-
 
 agent_builder.add_edge(START,"get_schema_context")
 agent_builder.add_edge("get_schema_context","plan_query")

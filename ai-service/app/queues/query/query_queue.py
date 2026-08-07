@@ -26,7 +26,9 @@ query_queue = Queue(QUERY_QUEUE, { "connection": REDIS_URL or "redis://localhost
 
 async def add_query_to_queue(data:QueueJobData):
     try:
-        job = await query_queue.add(QUERY_PROCESS_JOB, data)
+        job_data_dict = data.model_dump()
+
+        job = await query_queue.add(QUERY_PROCESS_JOB, job_data_dict)
         print(f"{QUERY_PROCESS_JOB} added to queue, job_id:{job.id}")
         return job.id
 

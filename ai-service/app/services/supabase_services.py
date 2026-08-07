@@ -15,6 +15,7 @@ async def download_file(supabase_file_path:str):
 
         f.write(response)
 
+    print("downloaded")
     return local_path
 
 

@@ -9,9 +9,10 @@ class SockerService:
         print("Init socker server....")
 
         self.sio = socket_server
-        self.init_listeners()
 
     def init_listeners(self):
+        print("socket_listeners are starting.....")
+
 
         @self.sio.event
         async def connect():
@@ -38,6 +39,4 @@ class SockerService:
                 sid = sid,
                 data = data,
                 sio = self.sio
-            )
-
-        
+            )     

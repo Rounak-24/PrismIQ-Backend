@@ -29,6 +29,6 @@ class GraphState(TypedDict):
     planner_error: str | None
 
     sql_query_result: list[dict[str, Any]]
-    kpi_result: dict[str, Any]
+    kpi_result: list[dict[str, Any]]
 
     execution_error: str | None

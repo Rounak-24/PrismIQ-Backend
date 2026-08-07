@@ -8,7 +8,7 @@ class DumpedDBoutput(TypedDict):
     dataset_id: str
     row_count: Any
     columns: List[dict[str:Any]]
-    schema: str
+    schema_context: str
 
 DATASET_DIR = "./data/datasets"
 os.makedirs(DATASET_DIR, exist_ok=True)
@@ -39,7 +39,7 @@ async def dump_file_to_db(local_filepath:str)-> DumpedDBoutput:
 
         connection.unregister("dataframe")
 
-        schema = connection.execute("""
+        schema_context = connection.execute("""
             DESCRIBE uploaded_data
         """).fetchall()
 
@@ -55,16 +55,17 @@ async def dump_file_to_db(local_filepath:str)-> DumpedDBoutput:
                 "name": column[0],
                 "type": column[1]
             }
-            for column in schema
+            for column in schema_context
         ]
 
         output_data = DumpedDBoutput(
-            dataset_id=dataset_id,
-            schema=schema,
-            row_count=row_count,
-            columns=columns
+            dataset_id = dataset_id,
+            schema_context = str(schema_context),
+            row_count = row_count,
+            columns = columns
         )
 
+        print("dumped")
         return output_data
 
     except Exception as e:

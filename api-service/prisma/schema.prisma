@@ -92,8 +92,7 @@ model Message {
     senderType      senderType
     senderName      String?
     sentAt          DateTime @default(now())
-
-    dashboards      Json[] @default([])
+    dashboards      Json?
 
     conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 

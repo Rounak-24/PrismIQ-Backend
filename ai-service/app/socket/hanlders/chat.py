@@ -1,6 +1,5 @@
 from app.queues.query.query_queue import add_query_to_queue, QueueJobData
 from app.services.dataset_services import download_and_dump
-from app.models.response_model import AiResponse
 from app.models.socket_data_model import SocketData
 from app.services.pubsub import publish_user_message
 from app.config.redis import redis
@@ -17,7 +16,7 @@ async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
     session_id:str = data.sessionId
     text:str = data.text
     supabase_file_path:str | None = data.supabaseFilePath
-    data_source:Literal["uploaded_dataset", "supabase_file"] = data.dataSource
+    data_source:Literal["workspace", "supabase_file"] = data.dataSource
 
     if not session_id or not text:
         sio.emit("error", {
@@ -26,11 +25,11 @@ async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
         print(f"send_message failed: Missing payload properties from {sid}")
         return
 
-    if data_source == "supabase_file" and not supabase_file_path:
+    if data_source == "uploaded_dataset" and not supabase_file_path:
         sio.emit("error", {
-            "message":f"send_message failed: dataSource is 'supabase_file' but supabaseFilePath is not provided from {sid}"
+            "message":f"send_message failed: dataSource is 'uploaded_dataset' but supabaseFilePath is not provided from {sid}"
         })
-        print(f"send_message failed: dataSource is 'supabase_file' but supabaseFilePath is not provided from {sid}")
+        print(f"send_message failed: dataSource is 'uploaded_dataset' but supabaseFilePath is not provided from {sid}")
         return
 
 
@@ -39,8 +38,8 @@ async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
 
     dumped_file_data = None
 
-    if data_source == "supabase_file" and supabase_file_path:
-        dumped_file_data = await download_and_dump(supabase_file_path) if data_source == "supabase_file" else None
+    if data_source == "uploaded_dataset" and supabase_file_path:
+        dumped_file_data = await download_and_dump(supabase_file_path) if data_source == "uploaded_dataset" else None
         await redis.set(getKey(session_id), dumped_file_data.get("dataset_id"))
 
 
@@ -55,19 +54,7 @@ async def send_message_handler(sid, data: SocketData, sio:socketio.AsyncServer):
     job_id = await add_query_to_queue(job_data)
 
     print(f"job added to queue for session_id: {session_id}")
-    sio.emit("job_enqueued", 
+    await sio.emit("job_enqueued", 
         data = { "jobId": job_id}, 
         room = session_id
     )
-
-
-async def broadcast_ai_response(sio:socketio.AsyncServer, response:AiResponse):
-    try:
-        ai_response = response
-        session_id = response.sessionId
-
-        sio.emit("receive_message", data=ai_response, room = session_id)
-        print(f"Broadcasted AI response to room {session_id}")
-
-    except Exception as e:
-        print(f"Error occured while sending response,{e}")
