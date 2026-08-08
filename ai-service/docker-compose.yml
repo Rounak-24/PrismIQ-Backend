@@ -17,11 +17,14 @@ services:
     ports:
       - "9092:9092"
     environment:
-      # KRaft configuration (No Zookeeper required)
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # For Bitnami images (if the above doesn't work):
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       
       # Listener configuration
       KAFKA_LISTENERS: PLAINTEXT://:29092,CONTROLLER://:9093,EXTERNAL://:9092
@@ -44,7 +47,32 @@ services:
       # Connects using the internal Docker network listener
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
+  
+  postgres:
+    image: postgres:17
+    container_name: postgres-db
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketing_intelligence
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 volumes:
   redis-data:
   kafka_data:
+  postgres_data:

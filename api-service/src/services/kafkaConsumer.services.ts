@@ -21,13 +21,13 @@ export const startMessageConsumer = async ()=>{
             if(!message.value) return
 
             try{
-                const msgValue = message.value.toString()
+                const msgValue = message.value.toString("utf-8")
                 const messageData:IMessage = JSON.parse(msgValue)
                 console.log(messageData)
-
+                
                 const isSaved = await saveMessage(messageData)
                 if(!isSaved) throw Error("Something went wrong while saving msg in DB")
-
+                // console.log(`message has been consumed`)
             }catch(err){
                 console.log(`Error occured for Kafka message consumer`)
                 pause()

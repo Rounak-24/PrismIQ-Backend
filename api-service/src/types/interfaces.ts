@@ -3,11 +3,11 @@ import {type messageSender } from "./enums"
 
 export interface IMessage{
     sessionId: string
-    content: string 
+    content?: string 
     senderType: messageSender
     sentAt: Date
     senderName?: string
-    dashboard?: Record<string,any>[]
+    dashboard?: Record<string,any>
 }
 
 
@@ -23,7 +23,8 @@ export interface IDashboard {
             "data": Record<string,any>[]
         }
     ],
-    "insights": [string]
+    "insights": [string],
+    "follow_up_questions"?: [string]
 }
 
 

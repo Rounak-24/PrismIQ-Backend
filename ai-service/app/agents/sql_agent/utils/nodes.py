@@ -21,7 +21,7 @@ kpi_store = [
 
 async def get_schema_context(state:GraphState):
     data_source = state.get("data_source")
-    if data_source is "workspace":
+    if (data_source=="workspace"):
         schema_context = await get_org_db_schema()
 
         return { **state, "schema_context": schema_context}
