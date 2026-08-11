@@ -1,4 +1,4 @@
-import {type messageSender } from "./enums"
+import {type messageSender, userStatus } from "./enums"
 
 
 export interface IMessage{
@@ -28,5 +28,11 @@ export interface IDashboard {
 }
 
 
+export interface IcachedUser {
+    emailVerified:  boolean,
+    isActive:       userStatus,
+    refreshToken:   string | null,
+    workspaces:     any[] | null
+}
 
 

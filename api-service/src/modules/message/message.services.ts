@@ -52,8 +52,5 @@ export const saveMessage = async (data:IMessage)=>{
     } catch(err){
         console.log(`Error occured while saving message to DB, ${err}`)
         return false
-    }
-    
-
-    
+    }    
 }

@@ -64,7 +64,7 @@ export const getUploads = async (workspaceId:string)=>{
             uploadedBy: true,
             size: true,
             format: true,
-            publicURL: true
+            supabaseFilePath: true
         }
     })
 }

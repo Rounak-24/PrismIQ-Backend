@@ -2,6 +2,8 @@ import type { Request, Response } from "express"
 import { asyncHandler } from "../../utils/asyncHandler.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { ApiResponse } from "../../utils/ApiResponse.js"
+import { getVerificationSuccessHTML } from "../../view/email.viewes.js"
+import { env } from "node:process"
 
 import { 
     registerUser, 
@@ -11,12 +13,14 @@ import {
     verifyResetPassOTP,
     sendResetPassOTP,
     updateAuthData, authData,
-    verifyEmail,
-    deleteTokensFromCache,
+    verifyEmailToken,
     validateRefreshToken,
     sendVerifyEmail
 
 } from "./auth.services.js"
+import type { IcachedUser } from "../../types/interfaces.js";
+import { cacheField, userStatus } from "../../types/enums.js";
+import { cacheUser, delCache, updateCache } from "../../services/cache.services.js";
 
 
 export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
@@ -39,8 +43,8 @@ export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
     }
 
     const saveToken = await saveTokens(newUser.id, name, email)
-    const { refreshToken, accessToken} = saveToken
-    const { id, emailVeriified } = newUser
+    const { refreshToken, accessToken } = saveToken
+    const { id, emailVerified } = newUser
 
     res.status(200).json(
         new ApiResponse(200, {
@@ -48,7 +52,7 @@ export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
                 id, 
                 name: newUser.name,
                 email: newUser.email,
-                emailVeriified
+                emailVerified
             },
             accessToken: accessToken,
             refreshToken: refreshToken
@@ -56,8 +60,17 @@ export const registerHandler = asyncHandler(async (req:Request, res:Response)=>{
         }, "Registration successful! Welcome to your workspace.")
     )
 
-    const url = `${req.protocol}://${req.get("host")}/verify-email?token=unHashedTempToken`
-    await sendVerifyEmail(email,name, url)
+    const cache:IcachedUser = {
+        emailVerified: emailVerified,
+        isActive: userStatus.ACTIVE,
+        refreshToken: refreshToken,
+        workspaces: null
+    }
+
+    await cacheUser(id, cache)
+
+    const baseURL = `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email`
+    await sendVerifyEmail(email,name, baseURL)
 
     return
 })
@@ -79,28 +92,38 @@ export const loginHandler = asyncHandler(async (req:Request, res:Response)=>{
         throw new ApiError(400, "Incorrect Password")
     }
 
-    const { id, fullname, emailVeriified } = exists
+    const { id, fullname, emailVerified, isActive } = exists
     const { accessToken, refreshToken } = await saveTokens(id, fullname, email)
 
-    return res.status(200).json(
+    res.status(200).json(
         new ApiResponse(200, {
-            user:{
+            user: {
                 id, 
                 name: fullname,
                 email, 
-                emailVeriified
+                emailVerified
             },
             accessToken: accessToken,
             refreshToken: refreshToken
             
         }, "Registration successful! Welcome to your workspace.")
     )
+
+    const cache:IcachedUser = {
+        emailVerified: emailVerified,
+        isActive: (isActive) ? userStatus.ACTIVE : userStatus.INACTIVE,
+        refreshToken,
+        workspaces: null
+    }
+
+    await cacheUser(id, cache)
+    return
 })
 
 
 export const logoutHandler = asyncHandler(async (req:Request, res:Response)=>{
     const { id, email } = req.user
-    await deleteTokensFromCache(id)
+    await delCache(id)
 
     await updateAuthData(email, { refreshToken: null }, authData.REFRESH_TOKEN)
 
@@ -115,8 +138,6 @@ export const refreshAccessHandler = asyncHandler(async (req:Request, res:Respons
     if(!correctToken){
         return res.json( new ApiError(401, "Invalid refreshToken, login again!"))
     }
-
-    await deleteTokensFromCache(id)
 
     const { accessToken, refreshToken } = await saveTokens(id, fullname, email)
     return res.json(
@@ -161,19 +182,32 @@ export const resetPassHandler = asyncHandler(async (req:Request, res:Response)=>
 })
 
 
+export const sendVerifyEmailHandler = asyncHandler(async (req:Request, res:Response)=>{
+    const { id, email, name } = req.user
+    if(!id || !email) throw new ApiError(402, "User data is missing")
+
+    const baseURL = `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email`
+    await sendVerifyEmail(email, name, baseURL)
+
+    return res.json( new ApiResponse(200, `Email verification sent to your email: ${email}`))
+})
+
+
 export const verifyEmailHandler = asyncHandler(async (req:Request, res:Response)=>{
-    const { token } = req.query
-    const { email } = req.user
-
+    const { token, email } = req.query as { token:string, email:string }
+    
+    if(!email) throw new ApiError(401,"User not found")
     if(!token) throw new ApiError(401,"Token not found")
-
-    const isVerified = await verifyEmail(token as string, email)
+    
+    const isVerified = await verifyEmailToken(token as string, email)
     if(!isVerified) throw new ApiError(400,"Invalid Token or Token has been expired")
     
-    await updateAuthData(email, { emailVeriified: true }, authData.EMAIL_VERIFIED)
+    
+    const updated = await updateAuthData(email, { emailVerified: true }, authData.EMAIL_VERIFIED)
 
-    return res.status(200).json({
-        success:true,
-        message:"Email verified successfully!"
-    })
+    if(!updated) return res.status(500).json({"message":"Something went wrong while updating field"})
+    else await updateCache(cacheField.EMAIL_VERIFIED, true, updated.id)
+
+    console.log(`Verified email for ${email}`)
+    return res.status(200).send(getVerificationSuccessHTML(env.APP_URL as string))
 })

@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
 import { uploader } from "./multer.middleware"
 import {
     fileUploadHandler,
@@ -7,5 +8,5 @@ import {
 
 export const uploadRouter = Router()
 
-uploadRouter.post("/", uploader.single("file"), fileUploadHandler)
-uploadRouter.get("/files", getUploadsHandler)
+uploadRouter.post("/", jwtAuthMiddleware, uploader.single("file"), fileUploadHandler)
+uploadRouter.get("/files", jwtAuthMiddleware, getUploadsHandler)

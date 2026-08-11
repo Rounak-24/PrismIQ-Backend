@@ -14,20 +14,27 @@ import {
     getWorkspaceMembers,
     delWorkspaceMember,
     updateWorkspaceMember,
-    joinWorkspace
+    joinWorkspace,
+    leaveWorkspace,
+    removeWorkspaceFromCache,
+    getUserEmailVerified
 
 } from "./workspace.services.js"
 
 
 export const createWorkspaceHandler = asyncHandler(async (req:Request, res:Response)=>{
     const { title } = req.body
-    const { id } = req.user as {id:string}  
+    const { id } = req.user as { id:string, emailVerified:boolean }  
 
+    const { emailVerified } = await getUserEmailVerified(id) as { emailVerified:boolean }
+    if(!emailVerified) throw new ApiError(401,"Verify your email for creating workspace")
+    
     if(!title){
         throw new ApiError(400, "Workspace title is required")
     }
-
+    
     const workspace = await createWorkspace(title, id)
+
     return res.status(200).json(
         new ApiResponse(200, workspace, "Workspace created successfully")
     )
@@ -52,7 +59,7 @@ export const sendInviteEmailHandler = asyncHandler(async (req:Request, res:Respo
 
     const user = await getUserDataByEmail(email)
 
-    if(!user || !user.emailVeriified){
+    if(!user || !user.emailVerified){
         throw new ApiError(404,`User with ${email} has not verified their email or no user exists with the email`)
     }
 
@@ -86,6 +93,19 @@ export const joinWorkspaceHandler = asyncHandler(async (req:Request, res:Respons
 })
 
 
+export const leaveWorkspaceHandler = asyncHandler(async (req:Request, res:Response)=>{
+    const { workspaceId } = req.params as { workspaceId:string }
+    const { id } = req.user as { id:string }
+
+    if(!workspaceId){
+        throw new ApiError(400, "workspaceId is required")
+    }       
+
+    await leaveWorkspace(workspaceId, id)
+    return res.json( new ApiResponse(200, null, "Leaved Workspace successfully"))
+})
+
+
 export const delWorkspaceHandler = asyncHandler(async (req:Request, res:Response)=>{
     const { workspaceId } = req.params as { workspaceId:string }
 
@@ -94,18 +114,21 @@ export const delWorkspaceHandler = asyncHandler(async (req:Request, res:Response
     }       
 
     await delWorkspace(workspaceId)
-    return res.json( new ApiResponse(200, null, "Workspace deleted successfully") )
+    res.json( new ApiResponse(200, null, "Workspace deleted successfully") )
+    return await removeWorkspaceFromCache(req.user?.id)
 })
 
 export const updateWorkspaceHandler = asyncHandler(async (req:Request, res:Response)=>{
-    const { workspaceId } = req.params as { workspaceId:string }    
+    const { workspaceId } = req.params as { workspaceId:string }   
+    const { title } = req.body 
 
     if(!workspaceId){
         throw new ApiError(400, "workspaceId is required")
     }  
 
-    await updateWorkSpace(workspaceId, req.body)
-    return res.json( new ApiResponse(200, null, "Workspace updated successfully") )
+    await updateWorkSpace(workspaceId, title)
+    res.json( new ApiResponse(200, null, "Workspace updated successfully") )
+    return await removeWorkspaceFromCache(req.user?.id)
 })
 
 export const getWorkspaceMembersHandler = asyncHandler(async (req:Request, res:Response)=>{

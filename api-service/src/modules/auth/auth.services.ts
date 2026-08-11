@@ -6,6 +6,7 @@ import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue.js"
 import { getVerifyEmailHTML, getPassResetOtpHTML } from "../../view/email.viewes"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
+import { getKey } from "../../services/cache.services.js"
 
 
 interface IRegistrationData{
@@ -23,29 +24,25 @@ interface ITempTokenObj {
 export enum authData {
     PASSWORD = "password",
     REFRESH_TOKEN = "refreshToken",
-    EMAIL_VERIFIED = "emailVeriified"
+    EMAIL_VERIFIED = "emailVerified"
 }
 
 interface IupdateAuthData {
     password?:      string
     refreshToken?:  string | null
-    emailVeriified?:boolean
-}
-
-function getRefreshTokenkey(id: string){
-    return `refreshToken:${id}`
+    emailVerified?:boolean
 }
 
 export const generateTokens = (id:string, name:string, email:string)=>{
     const accessToken = jwt.sign({
-        id, email
+        id, email, name
 
     },env.JWT_SECRET_KEY as Secret, {
         expiresIn: env.ACCESS_TOKEN_EXPIRY
     } as SignOptions)
 
     const refreshToken = jwt.sign({
-        id, email, name
+        id, email
 
     },env.JWT_SECRET_KEY as Secret, {
         expiresIn: env.REFRESH_TOKEN_EXPIRY
@@ -55,7 +52,8 @@ export const generateTokens = (id:string, name:string, email:string)=>{
 }
 
 export const validateRefreshToken = async (id:string, refreshToken: string|null)=>{
-    const findInCache = await redis.get(getRefreshTokenkey(id))
+    const findInCache = await redis.hget(getKey(id), "refreshToken")
+
     if(!findInCache){
         const findInDB = await prisma.user.findUnique({
             where: { id:id },
@@ -71,14 +69,9 @@ export const validateRefreshToken = async (id:string, refreshToken: string|null)
     else return true
 }
 
-export const deleteTokensFromCache = async (id:string)=>{
-    const refreshToken = await redis.get(getRefreshTokenkey(id))
-    if(refreshToken) await redis.del(getRefreshTokenkey(id))
-}
-
 export const saveTokens = async (id:string, name:string, email:string)=>{
     const { accessToken, refreshToken } = generateTokens(id, name, email)
-    await redis.set(getRefreshTokenkey(id), refreshToken, "EX", 2*60*60)
+    await redis.hset(getKey(id), "refreshToken", refreshToken)
 
     const update = await prisma.user.update({
         where: {id: id},
@@ -107,7 +100,8 @@ export const findUserByEmail = async(email:string)=>{
             id: true,
             password: true,
             fullname: true,
-            emailVeriified: true
+            emailVerified: true,
+            isActive: true
         }
     })
 }
@@ -126,14 +120,14 @@ export const registerUser = async (registrstionData: IRegistrationData)=>{
         }
     })
 
-    const {id, fullname, email, organization, emailVeriified} = createUser
+    const {id, fullname, email, organization, emailVerified} = createUser
 
     return {
         id,
         name: fullname,
         email,
         organization,
-        emailVeriified
+        emailVerified
     }
 }
 
@@ -195,9 +189,9 @@ function generateTempToken():ITempTokenObj {
     return {hashedTempToken, unHashedTempToken}
 }
 
-export const sendVerifyEmail = async (email:string, fullname:string, urlStr:string)=>{
+export const sendVerifyEmail = async (email:string, fullname:string, baseURL:string)=>{
     const {unHashedTempToken, hashedTempToken} = generateTempToken() 
-    const url = urlStr.replace("unHashedTempToken", unHashedTempToken)
+    const url = `${baseURL}?token=${unHashedTempToken}&email=${email}`
 
     await redis.set(tokenKey(email),hashedTempToken, 'EX', 24*60*60)
     const mailHTML = getVerifyEmailHTML(fullname, url)
@@ -209,9 +203,9 @@ export const sendVerifyEmail = async (email:string, fullname:string, urlStr:stri
     }, emailQueueJob.SEND_VERIFY_EMAIL)
 }
 
-export const verifyEmail = async (token:string, email:string)=>{
+export const verifyEmailToken = async (token:string, email:string)=>{
     const savedToken = await redis.get(tokenKey(email))
-
+    console.log(token,"------",savedToken)
     if(!savedToken || (savedToken !== hash(token))) return false
 
     await redis.del(tokenKey(email))
@@ -228,14 +222,15 @@ export const updateAuthData = async (email:string, data:IupdateAuthData, type:au
         
         case("refreshToken"):
             await prisma.user.update({
-                where: {email:email},
+                where: { email:email },
                 data: { refreshToken: data.refreshToken as string}
             })
 
-        case("emailVeriified"):
-            await prisma.user.update({
+        case("emailVerified"):
+            return await prisma.user.update({
                 where: { email:email },
-                data: { emailVeriified: data.emailVeriified as boolean}
+                data: { emailVerified: data.emailVerified as boolean},
+                select: { id: true }
             })
     }
 }

@@ -1,11 +1,14 @@
 import { Redis } from "ioredis"
 import { env } from "node:process"
 import { config } from "dotenv"
+import { hostname } from "node:os";
 config()
 
-export const redis = new Redis(
-    env.REDIS_URL || "redis://127.0.0.1:6379"
-)
+export const redis = new Redis({
+    host: "localhost",
+    port: 6379,
+    maxRetriesPerRequest: null
+})
 
 redis.on("error", (err)=>{
     console.log(`Error in Redis connection: ${err}`)

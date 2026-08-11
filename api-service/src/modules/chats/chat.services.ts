@@ -3,7 +3,7 @@ import { prisma } from "../../config/prisma"
 
 export const getChatSessions = async (workspaceId:string)=>{
     return await prisma.conversation.findMany({
-        where: { workspaceId},
+        where: { workspaceId },
         select: {
             id: true,
             title: true,
@@ -26,15 +26,7 @@ export const getMessages = async (sessionId:string)=>{
             senderType: true,
             senderName: true,
             sentAt:true,
-            dashboards:{
-                select:{
-                    id: true,
-                    title: true,
-                    kpis: true,
-                    charts: true,
-                    insights: true
-                }
-            }
+            dashboard:true
         }
     })
 
@@ -44,7 +36,7 @@ export const getMessages = async (sessionId:string)=>{
             sender: msg.senderType,
             text: msg.content,
             timestamp: msg.sentAt,
-            dashboard: ( msg.dashboards!== null && { dashboard: msg.dashboards })
+            dashboard: ( msg.dashboard!== null && { dashboard: msg.dashboard })
         }
     })
 }

@@ -19,8 +19,8 @@ model User {
 
     workspaceRoles      Role[]
 
-    refreshToken   String?
-    emailVeriified Boolean @default(false)
+    refreshToken    String?
+    emailVerified   Boolean @default(false)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt 

@@ -1,28 +1,58 @@
 import { prisma } from "../../config/prisma.js"
+import { updateCache, getAllCachedFields } from "../../services/cache.services.js";
+import { cacheField } from "../../types/enums.js";
 
-export const fetchWorkspaces = async (userId:string)=>{
-    const workspaces = await prisma.role.findMany({
-        where:{ 
-            userId
-        }, select:{
-            workspace:{
+
+
+export const fetchUserData = async (userId:string)=>{
+    const cache = await getAllCachedFields(userId)
+
+    if(cache){
+        const workspaceStr = cache.workspaces
+        const emailVerified = cache.emailVerified
+
+        if(workspaceStr) return {
+            workspaces: JSON.parse(workspaceStr),
+            emailVerified
+        }
+    }
+
+    const res = await prisma.user.findUnique({
+        where: { id: userId },
+        select:{
+            emailVerified: true,
+            workspaceRoles:{
                 select:{
-                    id:true,
-                    title:true,
-                    createdBy:true,
-                    createdAt:true,
-                }
-            }, role:true
-        }       
-    })
+                    workspace:{
+                        select:{
+                            id: true,
+                            title: true,
+                            createdAt: true,
+                            createdBy: true
+                        }
+                    },
 
-    return workspaces.map((workspace)=>{
-        return {
-            id:workspace.workspace.id, 
-            name:workspace.workspace.title,
-            createdBy:workspace.workspace.createdBy,
-            createdAt:workspace.workspace.createdAt,
-            role:workspace.role
+                    workRole: true
+                }
+            }
         }
     })
+
+    const workspaces = res?.workspaceRoles.map((role)=>{
+        return {
+            id:role.workspace.id, 
+            name:role.workspace.title,
+            createdBy:role.workspace.createdBy,
+            createdAt:role.workspace.createdAt,
+            role:role.workRole
+        }
+    })
+
+    const workspaceStr = JSON.stringify(workspaces)
+    await updateCache(cacheField.WORKSPACE, workspaceStr, userId)
+
+    return {
+        workspaces, 
+        emailVerified: res?.emailVerified
+    }
 }

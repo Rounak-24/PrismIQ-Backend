@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
 import {
     registerHandler,
     loginHandler,
@@ -7,7 +8,8 @@ import {
     resetPassHandler,
     verifyPassResetOTPHandler,
     forgotPassHandler,
-    verifyEmailHandler
+    verifyEmailHandler,
+    sendVerifyEmailHandler
 } from "./auth.controller.js"
 
 
@@ -18,6 +20,7 @@ authRouter.post('/login', loginHandler)
 authRouter.post('/forgot-password', forgotPassHandler)
 authRouter.post('/verify-otp', verifyPassResetOTPHandler)
 authRouter.post('/reset-password', resetPassHandler)
-authRouter.post('/verify-email',verifyEmailHandler)
-authRouter.post('/refresh',refreshAccessHandler)
-authRouter.post('/logout',logoutHandler)
+authRouter.get('/verify-email', verifyEmailHandler)
+authRouter.post('/refresh', jwtAuthMiddleware, refreshAccessHandler)
+authRouter.post('/logout', jwtAuthMiddleware, logoutHandler)
+authRouter.post('/send-veriy-email', jwtAuthMiddleware, sendVerifyEmailHandler)

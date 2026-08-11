@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
 import {
     delWorkspaceHandler,
     updateWorkspaceHandler,
@@ -13,12 +14,11 @@ import {
 
 export const workspaceRouter = Router()
 
-workspaceRouter.post("/", createWorkspaceHandler)
-workspaceRouter.delete("/:workspaceId", delWorkspaceHandler)
-workspaceRouter.put("/:workspaceId", updateWorkspaceHandler)
-workspaceRouter.post("/invite", sendInviteEmailHandler)
-workspaceRouter.get("/:workspaceId/members", getWorkspaceMembersHandler)
-workspaceRouter.put("/users", updateWorkspaceMemberHandler)
-workspaceRouter.get("/users/delete", delWorkspaceMemberHandler)
-workspaceRouter.post("/workspace/:workspaceId/join", joinWorkspaceHandler)
-
+workspaceRouter.post("/", jwtAuthMiddleware, createWorkspaceHandler)
+workspaceRouter.delete("/:workspaceId", jwtAuthMiddleware, delWorkspaceHandler)
+workspaceRouter.put("/:workspaceId", jwtAuthMiddleware, updateWorkspaceHandler)
+workspaceRouter.post("/invite", jwtAuthMiddleware, sendInviteEmailHandler)
+workspaceRouter.get("/:workspaceId/members", jwtAuthMiddleware, getWorkspaceMembersHandler)
+workspaceRouter.put("/users", jwtAuthMiddleware, updateWorkspaceMemberHandler)
+workspaceRouter.get("/users/delete", jwtAuthMiddleware, delWorkspaceMemberHandler)
+workspaceRouter.post("/workspace/:workspaceId/join", jwtAuthMiddleware, joinWorkspaceHandler)
