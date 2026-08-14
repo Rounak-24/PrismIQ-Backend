@@ -53,6 +53,7 @@ async def plan_query(state:GraphState):
             **state,
             "intent": response.intent,
             "confidence": response.confidence,
+            "response":response.response,
 
             "main_sql": response.mainSql,
             "kpi_sql": response.kpiSql,

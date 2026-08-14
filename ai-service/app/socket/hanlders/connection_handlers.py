@@ -10,12 +10,12 @@ async def join_session_handler(sio:socketio.AsyncServer, data, sid):
     
     if not session_id:
         print(f"join_session failed: Missing sessionId from {sid}")
-        sio.emit("error", {
+        await sio.emit("error", {
             "message":f"join_session failed: Missing sessionId from {sid}"
         })
         return
 
-    sio.enter_room(sid, room = session_id)
+    await sio.enter_room(sid, room = session_id)
     print(f"Client {sid} joined room: {session_id}")
 
 
@@ -24,7 +24,7 @@ async def leave_session_handler(sio:socketio.AsyncServer, data, sid):
         
     if not session_id:
         print(f"join_session failed: Missing sessionId from {sid}")
-        sio.emit("error", {
+        await sio.emit("error", {
             "message":f"join_session failed: Missing sessionId from {sid}"
         })
         return
@@ -36,5 +36,5 @@ async def leave_session_handler(sio:socketio.AsyncServer, data, sid):
 
         await redis.delete(getKey(session_id))
 
-    sio.leave_room(sid, room = session_id)
+    await sio.leave_room(sid, room = session_id)
     print(f"Client {sid} left room: {session_id}")

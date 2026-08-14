@@ -11,7 +11,6 @@ load_dotenv()
 llm = ChatGoogleGenerativeAI(
     model = "gemini-3.6-flash",
     api_key = os.getenv("GEMINI_API_KEY"),
-    temperature=0
 )
 
 sql_planner_llm = llm.with_structured_output(

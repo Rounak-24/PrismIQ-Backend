@@ -23,7 +23,7 @@ async def publish_ai_message(message_data:MessageModel):
         message_data_str_json = message_data.model_dump_json()
         # print(type(message_data_str_json))     <class 'str'>
         await redis.publish(MESSAGE_PUBLISHER_CHANNEL, message_data_str_json)
-        print(f"Message published, session_id:{message_data.sessionId}")
+        print(f"Message published to pubsub Server, session_id:{message_data.sessionId}")
 
     except Exception as e:
         print(f"Error publishing message: {e}")

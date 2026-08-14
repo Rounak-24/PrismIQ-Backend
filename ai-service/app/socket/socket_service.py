@@ -1,7 +1,9 @@
 import socketio
 from app.models.socket_data_model import SocketData
 from app.socket.hanlders.chat import send_message_handler
+from app.socket.hanlders.file_chat import file_chat_handler
 from app.socket.hanlders.connection_handlers import join_session_handler, leave_session_handler
+from app.socket.hanlders.auth_handler import setup_socket_auth
 
 
 class SockerService:
@@ -15,12 +17,18 @@ class SockerService:
 
 
         @self.sio.event
-        async def connect():
-            print("connected to socketio Server")
+        async def connect(sid, environ, auth):
+            await setup_socket_auth(
+                sio=self.sio,
+                sid=sid, 
+                environ=environ, 
+                auth=auth
+            )
+            print("✅connected to socketio Server")
 
         @self.sio.event
-        async def disconnect():
-            print("connected to socketio Server")
+        async def disconnect(sid):
+            print(f"disconnected to socketio Server, sid:{sid}")
 
 
         @self.sio.on("join_session")
@@ -37,6 +45,15 @@ class SockerService:
         async def send_message(sid, data:SocketData):
             await send_message_handler(
                 sid = sid,
-                data = data,
+                socket_data = data,
                 sio = self.sio
-            )     
+            )   
+
+
+        @self.sio.on("send_file_message")
+        async def send_file_message_handler(sid, data:SocketData):
+            await file_chat_handler(
+                sio = self.sio,
+                sid = sid,
+                socket_data = data
+            )

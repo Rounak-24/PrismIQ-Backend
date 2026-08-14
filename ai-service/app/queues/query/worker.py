@@ -44,11 +44,11 @@ async def publish_and_produce_response(job: Job, result: GraphState):
     try:
         job_data:QueueJobData = job.data
         session_id = job_data["session_id"]
-
+        print(result)
         serialized_data = serialize_GraphState_to_MessageModel(result)
         # print(f"data serialized after work completion",serialized_data)
         await publish_ai_message(serialized_data)
-        print(f"Job completed for {session_id}, passed to pub-sub")
+        print(f"Job completed for {session_id}")
 
     except Exception as e:
         print(f"Error processing after job complition for session_id: { job_data["session_id"] }, error: {e}")

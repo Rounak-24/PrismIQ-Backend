@@ -29,6 +29,7 @@ class KPIConfig(BaseModel):
 
 class PlannerResponse(BaseModel):
     intent: str
+    response: str | None
 
     confidence: float = Field(
         ge=0,

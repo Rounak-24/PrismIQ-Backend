@@ -22,6 +22,7 @@ class GraphState(TypedDict):
     kpi_config: list[dict]
     chart_config: dict
 
+    response: str | None
     insight_focus: list[str]
     follow_up_questions: list[str]
     analysisDescription: str | None

@@ -13,3 +13,5 @@ class MessageModel(BaseModel):
     sentAt: datetime.datetime
     senderName: str | None
     dashboard: DashboardModel | None
+    clientSideMessageId: str | None = None
+    follow_up_questions: list[str] = []

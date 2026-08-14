@@ -8,5 +8,6 @@ class SocketData(BaseModel):
     text: str
     sentAt: datetime.datetime
     senderName: str
-    dataSource: Literal["uploaded_dataset", "supabase_file"]
+    dataSource: Literal["uploaded_dataset", "workspace"]
     supabaseFilePath: str | None = None
+    clientSideMessageId: str
