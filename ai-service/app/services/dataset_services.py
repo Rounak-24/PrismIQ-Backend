@@ -123,5 +123,36 @@ async def delete_dataset(dataset_id:str):
     dataset_path = os.path.join(db_dir, f"{dataset_id}.duckdb")
 
     await os.remove(dataset_path)
-    
-        
+
+
+async def execute_sql_in_org_db(sql:str):
+    org_db_path = os.path.join(DATASET_DIR, "org.duckdb")
+
+    if not os.path.exists(org_db_path):
+        raise Exception(
+            detail="Dataset not found"
+        )
+
+    connection = None
+
+    try:
+        connection = duckdb.connect(org_db_path, read_only = True)
+        sql_result = connection.execute(sql)
+
+        columns = [
+            column[0]
+            for column in sql_result.description
+        ]
+        rows = sql_result.fetchall()
+
+        return [
+            dict(zip(columns, row))
+            for row in rows
+        ]
+
+    except Exception as e:
+        print("Error occured while exeuting sql in org db",e)
+        raise e
+
+    finally:
+        if connection: connection.close()   

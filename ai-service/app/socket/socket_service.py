@@ -57,3 +57,10 @@ class SockerService:
                 sid = sid,
                 socket_data = data
             )
+
+    async def send_error_event(self, session_id:str, err):
+        sio = self.sio
+        await sio.emit(event = "error", data = {
+            "message":str(err)
+        }, room = session_id)
+        print("Error event sent")

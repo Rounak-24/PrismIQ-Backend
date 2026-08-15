@@ -10,6 +10,7 @@ export const saveDashboard = async (workspaceId:string, data:IDashboard)=>{
             insights: data.insights,
             kpis: data.kpis,
             charts: data.charts,
+            chartData: data.chart_data
         }
     })
 }

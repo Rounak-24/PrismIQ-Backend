@@ -21,7 +21,7 @@ async function init() {
         })
 
         initQueueWorker()
-        // startMessageConsumer()
+        startMessageConsumer()
         
 
     }catch(err){

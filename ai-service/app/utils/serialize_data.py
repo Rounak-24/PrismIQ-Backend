@@ -2,7 +2,7 @@ from app.models.message_model import MessageModel, MESSAGE_SENDER_AI, MESSAGE_SE
 from app.models.dashboard_model import DashboardModel
 from app.models.socket_data_model import SocketData
 from app.agents.sql_agent.utils.state import GraphState
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import TypedDict, Any
 
 class FinalKPIResult(TypedDict):
@@ -32,8 +32,10 @@ def serialize_GraphState_to_MessageModel(state:GraphState)->MessageModel:
 
     dashboard_data_dict = None
 
-    if len(kpi_config_arr) is not 0 and chart is not None:
+    if (len(kpi_config_arr)!= 0) and chart is not None:
         print("inside loop")
+
+        main_sql_result = state.get("sql_query_result")
         kpi_result = state.get("kpi_result")
         final_kpi_result:list[dict[str,Any]] = []
 
@@ -42,6 +44,8 @@ def serialize_GraphState_to_MessageModel(state:GraphState)->MessageModel:
             label = kpi_config.get("label")
             unit = kpi_config.get("format")
             value = kpi_result[0].get(key)
+            if isinstance(value, datetime):
+                value = value.isoformat()
 
             final_data = FinalKPIResult(
                 label=label,
@@ -55,7 +59,8 @@ def serialize_GraphState_to_MessageModel(state:GraphState)->MessageModel:
             title = state.get("analysisDescription"),
             insightFocus = state.get("insight_focus"),
             chart = state.get("chart_config"),
-            kpis = final_kpi_result
+            kpis = final_kpi_result,
+            chart_data = main_sql_result
         )
 
         dashboard_data_dict = dashboard_data.model_dump()
@@ -71,3 +76,14 @@ def serialize_GraphState_to_MessageModel(state:GraphState)->MessageModel:
     )
 
     return message_data
+
+
+def make_json_serializable(data):
+    """Recursively converts datetime and date objects to ISO format strings."""
+    if isinstance(data, dict):
+        return {key: make_json_serializable(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [make_json_serializable(item) for item in data]
+    elif isinstance(data, (datetime, date)):
+        return data.isoformat()
+    return data

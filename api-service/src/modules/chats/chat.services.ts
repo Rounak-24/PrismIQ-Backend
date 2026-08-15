@@ -1,9 +1,24 @@
 import { prisma } from "../../config/prisma"
 
 
+export const createChat = async (workspaceId:string, title:string)=>{
+    return await prisma.conversation.create({
+        data:{
+            workspaceId: workspaceId,
+            title: title
+        }, select:{
+            id: true,
+            title: true,
+            workspaceId: true,
+            createdAt: true
+        }
+    })
+}
+
+
 export const getChatSessions = async (workspaceId:string)=>{
     return await prisma.conversation.findMany({
-        where: { workspaceId },
+        where: { workspaceId, fileuploadId: null },
         select: {
             id: true,
             title: true,
@@ -18,7 +33,7 @@ export const delChatSession = async (sessionId:string)=>{
 }
 
 export const getMessages = async (sessionId:string)=>{
-    const msgs = await prisma.message.findMany({
+    return await prisma.message.findMany({
         where: { conversationId: sessionId },
         select: {
             id: true,
@@ -26,17 +41,17 @@ export const getMessages = async (sessionId:string)=>{
             senderType: true,
             senderName: true,
             sentAt:true,
-            dashboard:true
+            dashboards:true
         }
     })
+}
 
-    return msgs.map((msg)=>{
-        return {
-            id: msg.id,
-            sender: msg.senderType,
-            text: msg.content,
-            timestamp: msg.sentAt,
-            dashboard: ( msg.dashboard!== null && { dashboard: msg.dashboard })
-        }
+export const updateChatTitle = async (sessionId:string, newTitle:string)=>{
+    return prisma.conversation.update({
+        where:{ id: sessionId },
+        data:{
+            title: newTitle
+        }, 
+        omit: { updatedAt: true }
     })
 }

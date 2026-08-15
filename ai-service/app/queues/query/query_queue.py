@@ -34,3 +34,8 @@ async def add_query_to_queue(data:QueueJobData):
 
     except Exception as e:
         print(f"Error occured while adding query to queue, {e}")
+
+
+async def remove_job(job_id:str):
+    await query_queue.remove(job_id = job_id)
+    print("Job removed from queue, job_id: ", job_id)

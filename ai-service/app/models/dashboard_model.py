@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal
+from typing import Literal, Any
 
 class ChartConfig(BaseModel):
     type: Literal[
@@ -19,3 +19,4 @@ class DashboardModel(BaseModel):
     insightFocus: list[str] = []
     kpis: list[dict] = []
     chart: ChartConfig
+    chart_data: list[dict[str,Any]]

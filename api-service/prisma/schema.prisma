@@ -25,6 +25,8 @@ model User {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt 
 
+    sentInvites     WorkspaceInvitation[] @relation("InvitationsSent")
+    receivedInvites WorkspaceInvitation[] @relation("InvitationsReceived")
 }
 
 enum workStatus {
@@ -48,6 +50,9 @@ model Role {
 
     workspaceUser User @relation(fields: [userId], references: [id], onDelete: Cascade)
     workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([workspaceId])
 }
 
 
@@ -63,6 +68,8 @@ model Workspace {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    invites         WorkspaceInvitation[]
 }
 
 
@@ -76,7 +83,12 @@ model Conversation {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    fileuploadId String? @unique
+
+    fileUpload FileUpload? @relation(fields: [fileuploadId], references: [id], onDelete: Cascade)
     workspaceConversation Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@index([workspaceId])
 }
 
 enum senderType {
@@ -88,13 +100,13 @@ model Message {
     id      String @id @default(cuid())
     content String?
 
-    conversationId  String
+    conversationId  String?
     senderType      senderType
     senderName      String?
     sentAt          DateTime @default(now())
     dashboards      Json?
 
-    conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+    conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
     @@index([conversationId])
 }
@@ -105,8 +117,9 @@ model Dashboard {
     title       String
     insights    String[]
     
-    kpis    Json[]
-    charts  Json[]
+    kpis        Json[]
+    charts      Json[]
+    chartData   Json[]
 
     workspaceId String?
     messageId   String?
@@ -123,6 +136,39 @@ model FileUpload {
     format      String
     workspaceId String
     supabaseFilePath   String
-
+    createdAt   DateTime @default(now())
+    
+    conversation Conversation?
     workspaceFile Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model WorkspaceInvitation {
+    id            String   @id @default(uuid())
+
+    invitedToId   String
+    invitedById   String
+    workspaceId   String
+    invitedRole   workRole
+
+    status        InvitationStatus @default(PENDING)
+
+    respondedAt DateTime?
+    createdAt   DateTime @default(now())
+
+    workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+    invitedToUser User @relation( "InvitationsReceived", fields: [invitedToId], references: [id],onDelete: Cascade)
+    invitedByUser User @relation("InvitationsSent",fields: [invitedById],references: [id],onDelete: Cascade)
+
+
+    @@index([invitedToId])
+    @@index([invitedById])
+    @@index([workspaceId])
 }

@@ -98,6 +98,7 @@ SELECT
 FROM uploaded_data
 WHERE ...
 
+Always use the "uploaded_data" Table, as the data dumped in this name
 The aliases returned by kpiSql MUST exactly match the KPI keys.
 
 The KPI query MUST apply the same relevant filters and time period as
@@ -304,7 +305,6 @@ If the user asks a casual, conversational, informative or unrelated question:
 - user does not want to know any information from databases, nut user wants information about 
   analytical terms, business terms etc.
 - suggest follow-up questions based on your experties
-- until user asks for data don't generate SQL, KPI SQL, charts, or analytical insights.
 
 Set:
 
