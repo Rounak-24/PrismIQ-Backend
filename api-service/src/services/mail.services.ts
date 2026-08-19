@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer"
+import nodemailer, {type Transporter} from "nodemailer"
 
 export interface IEmailOptionObj {
     mailHTML: string
@@ -9,10 +9,14 @@ export interface IEmailOptionObj {
 //For dev and testing using nodemailer local test account
 import { createTransport, createTestAccount } from "nodemailer"
 
+let transporter:Transporter|null = null
+
 export const getTransporter = async ()=>{
+    if (transporter) return transporter
+
     const testAccount = await createTestAccount()
 
-    const transporter = createTransport({
+    transporter = createTransport({
         host: testAccount.smtp.host,
         port: testAccount.smtp.port,
         secure: testAccount.smtp.secure,
@@ -26,16 +30,6 @@ export const getTransporter = async ()=>{
 }
 
 export const sendEmail = async (options:IEmailOptionObj)=>{
-    // const mailGenerator = new mailgen({
-    //     theme:'default',
-    //     product:{
-    //         name:'Demo001',
-    //         link:'http://demo.com'
-    //     }
-    // })
-
-    // const emailText = mailGenerator.generatePlaintext(options.mailgenContent)
-    // const emailHTML = mailGenerator.generate(options.mailgenContent)
     const emailHTML = options.mailHTML
 
     const transporter = await getTransporter()

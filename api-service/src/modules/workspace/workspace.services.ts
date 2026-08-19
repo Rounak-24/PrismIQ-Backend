@@ -2,8 +2,6 @@ import { prisma } from "../../config/prisma"
 import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue"
 import { getInviteUserHTML } from "../../view/email.viewes"
 import { workRole, userStatus } from "../../types/enums"
-import { connect } from "http2";
-
 
 export enum userInWorkspaceStatus {
     PRESENT_WITH_CURR_ROLE = "PRESENT_WITH_CURR_ROLE",
@@ -17,10 +15,10 @@ export const createWorkspace = async (title:string, userId:string)=>{
         data:{
             title,
             createdBy:userId,
-            roles:{
+            userRoles:{
                 create:{
                     userId,
-                    role: workRole.ADMIN
+                    workRole: workRole.ADMIN
                 }
             }
         },
@@ -28,7 +26,7 @@ export const createWorkspace = async (title:string, userId:string)=>{
             id:true,
             title:true,
             createdAt:true,
-            createdBy:true  
+            createdBy:true
         }
     })
 
@@ -41,12 +39,20 @@ export const createWorkspace = async (title:string, userId:string)=>{
 }
 
 
+export const getUserEmailVerified = async (userId:string)=>{
+    return await prisma.user.findUnique({
+        where :{ id: userId },
+        select:{ emailVerified:true }
+    })
+}
+
+
 export const getUserDataByEmail = async (email:string)=>{
-    const user = await prisma.user.findFirst({
-        where:{ email }, 
+    return await prisma.user.findFirst({
+        where:{ email:email, isActive:true }, 
         select:{
             id: true,
-            emailVeriified: true,
+            emailVerified: true,
             workspaceRoles:{
                 select:{
                     workspaceId:true,
@@ -55,20 +61,23 @@ export const getUserDataByEmail = async (email:string)=>{
             }
         }
     })
-    
-    return user
 }
 
-export const userInWorkspace = (workspaces:{workRole:workRole, workspaceId:string}[], workspaceId:string, role:workRole)=>{
-    workspaces.forEach((workspace)=>{
-        if(workspace.workspaceId===workspaceId && workspace.workRole===role){
-            return userInWorkspaceStatus.PRESENT_WITH_CURR_ROLE
-        }
+export const userInWorkspace = (
+    workspaces:{workRole:workRole, workspaceId:string}[], 
+    workspaceId:string, 
+    role:workRole
+)=>{
 
-        else if(workspace.workspaceId===workspaceId){
-            return userInWorkspaceStatus.PRESENT_WITH_DIFF_ROLE
-        }
-    })
+    const userExistsWithRole = workspaces.some((workspace)=>
+        workspace.workspaceId===workspaceId && workspace.workRole===role
+    )
+    if(userExistsWithRole) return userInWorkspaceStatus.PRESENT_WITH_CURR_ROLE
+
+    const userExitsWithDiffRole = workspaces.some((workspace)=>
+        workspace.workspaceId===workspaceId
+    )
+    if(userExitsWithDiffRole) return userInWorkspaceStatus.PRESENT_WITH_DIFF_ROLE 
 
     return userInWorkspaceStatus.ABSENT
 }
@@ -84,23 +93,29 @@ export const sendInviteEmail = async (sender:string, to:string, role:string, wor
     },emailQueueJob.SEND_INVITE_EMAIL)
 }
 
-export const delWorkspace = async (workspaceId:string)=>{
+export const leaveWorkspace = async (workspaceId:string, userId:string)=>{
     await prisma.role.deleteMany({
         where:{
-            workspaceId
+            workspaceId,
+            userId: userId
         }
-    })      
+    })  
+}
+
+export const delWorkspace = async (workspaceId:string)=>{
+    await prisma.workspace.delete({where:{ id:workspaceId }})
 }
 
 export const updateWorkSpace = async (id:string, newTitle:string)=>{
     await prisma.workspace.update({
-        where: { id: id},
-        data:{ title: newTitle }
+        where: { id: id },
+        data:{ title: newTitle },
+        select:{ title: true }
     })
 }
 
 export const getWorkspaceMembers = async (workspaceId:string)=>{
-    const members = await prisma.role.findMany({
+    const res = await prisma.role.findMany({
         where: { workspaceId },
         select:{
             workspaceUser:{
@@ -108,12 +123,17 @@ export const getWorkspaceMembers = async (workspaceId:string)=>{
                     id: true,
                     fullname: true,
                     email: true,
+                    isActive: true
                 }
             },
             workRole: true,
             status: true
         }
     })
+
+    const members = res.filter(
+        (resObj)=> resObj.workspaceUser.isActive!==false
+    )
 
     return members.map((member)=>{
         return {
@@ -129,25 +149,33 @@ export const getWorkspaceMembers = async (workspaceId:string)=>{
 
 export const updateWorkspaceMember = 
 async (workspaceId:string, memberId:string, role:workRole, status:userStatus)=>{
+    if(status && role){
+        return await prisma.role.updateManyAndReturn({
+            where:{ workspaceId, userId: memberId },
+            data:{ status , workRole: role},
+            select:{ status:true, workRole:true }
+        })
+    }
 
-    await prisma.role.updateMany({
-        where: { workspaceId, userId: memberId },
-        data:{ status , workRole: role}
-    })  
+    if(status){
+        return await prisma.role.updateManyAndReturn({
+            where:{ workspaceId, userId: memberId },
+            data:{ status:status },
+            select:{ status:true }
+        })
+    }
+
+    if(role){
+        return await prisma.role.updateManyAndReturn({
+            where:{ workspaceId, userId: memberId },
+            data:{ workRole:role },
+            select:{ workRole:true }
+        })
+    }
 }
 
 export const delWorkspaceMember = async (memberId:string, workspaceId:string)=>{
     await prisma.role.deleteMany({
         where: { workspaceId, userId: memberId }
-    })
-}
-
-export const joinWorkspace = async (workspaceId:string, userId:string, role:workRole)=>{
-    return await prisma.role.create({
-        data:{
-            workspaceId,
-            workRole: role,
-            userId
-        }
     })
 }

@@ -30,7 +30,7 @@ export const jwtAuthMiddleware = (req:Request, res:Response, next:NextFunction)=
             fullname: decoded.name
         }
 
-        // console.log(user)
+        console.log(`User has been authenticated`)
         req.user = user
         next()
     }catch(err){

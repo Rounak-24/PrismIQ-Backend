@@ -6,7 +6,6 @@ import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue.js"
 import { getVerifyEmailHTML, getPassResetOtpHTML } from "../../view/email.viewes"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
-import { getKey } from "../../services/cache.services.js"
 
 
 interface IRegistrationData{
@@ -32,6 +31,11 @@ interface IupdateAuthData {
     refreshToken?:  string | null
     emailVerified?:boolean
 }
+
+function getKey(userId:string){
+    return `user:${userId}`
+}
+
 
 export const generateTokens = (id:string, name:string, email:string)=>{
     const accessToken = jwt.sign({
@@ -164,8 +168,6 @@ export const sendResetPassOTP = async (email:string)=>{
         subject: "OTP for password reset request"
         
     }, emailQueueJob.SEND_PASS_RESET_OTP)
-
-    console.log(`${emailQueueJob.SEND_PASS_RESET_OTP} Job enqueued to Queue`)
 }
 
 export const verifyResetPassOTP = async (email:string, otp:string)=>{
@@ -212,14 +214,21 @@ export const verifyEmailToken = async (token:string, email:string)=>{
     return true
 }
 
+export const changePassword = async (email:string, newPassword:string)=>{
+    const newPassHash = await hashPassword(newPassword)
+
+    const changed = await prisma.user.update({
+        where:{ email: email },
+        data:{ password: newPassHash },
+        select:{ id: true }
+    })
+
+    if (changed) return true
+    else return false
+}
+
 export const updateAuthData = async (email:string, data:IupdateAuthData, type:authData)=>{
     switch(type){
-        case("password"):
-            await prisma.user.update({
-                where: {email:email},
-                data: {password: data.password as string}
-            })
-        
         case("refreshToken"):
             await prisma.user.update({
                 where: { email:email },

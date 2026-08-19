@@ -1,21 +1,7 @@
 import { prisma } from "../../config/prisma.js"
-import { updateCache, getAllCachedFields } from "../../services/cache.services.js";
-import { cacheField } from "../../types/enums.js";
-
 
 
 export const fetchUserData = async (userId:string)=>{
-    const cache = await getAllCachedFields(userId)
-
-    if(cache){
-        const workspaceStr = cache.workspaces
-        const emailVerified = cache.emailVerified
-
-        if(workspaceStr) return {
-            workspaces: JSON.parse(workspaceStr),
-            emailVerified
-        }
-    }
 
     const res = await prisma.user.findUnique({
         where: { id: userId },
@@ -31,7 +17,7 @@ export const fetchUserData = async (userId:string)=>{
                             createdBy: true
                         }
                     },
-
+                    status: true,
                     workRole: true
                 }
             }
@@ -44,15 +30,31 @@ export const fetchUserData = async (userId:string)=>{
             name:role.workspace.title,
             createdBy:role.workspace.createdBy,
             createdAt:role.workspace.createdAt,
-            role:role.workRole
+            role:role.workRole,
+            status:role.status
         }
     })
-
-    const workspaceStr = JSON.stringify(workspaces)
-    await updateCache(cacheField.WORKSPACE, workspaceStr, userId)
 
     return {
         workspaces, 
         emailVerified: res?.emailVerified
     }
+}
+
+export const updateFullname = async (userId:string, newName:string)=>{
+    const updated = await prisma.user.update({
+        where: { id:userId },
+        data:{ fullname: newName }, 
+        select: { fullname:true }
+    })
+
+    return updated
+}
+
+export const deactivateAcc = async (userId:string)=>{
+    return await prisma.user.update({
+        where: { id:userId },
+        data: { isActive:false },
+        select: { isActive:true }
+    })
 }

@@ -11,6 +11,7 @@ import { chatRouter } from "./modules/chats/chat.routes.js"
 import { uploadRouter } from "./modules/upload/upload.route.js"
 import { userRouter } from "./modules/user/user.routes.js"
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js"
+import { invitationRouter } from "./modules/invite/invite.routes.js"
 
 export const app:Express = express()
 
@@ -34,3 +35,4 @@ app.use("/api/v1/workspaces",workspaceRouter)
 app.use("/api/v1/upload",uploadRouter)
 app.use("/api/v1/chat",chatRouter)
 app.use("/api/v1/dashboards",dashboardRouter)
+app.use("/api/v1/invitation",invitationRouter)

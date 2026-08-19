@@ -19,10 +19,9 @@ export enum emailStatus {
     FALSE = "FALSE"
 }
 
-export enum cacheField {
-    EMAIL_VERIFIED = "emailVerified",
-    IS_ACTIVE = "isActive",
-    REFRESH_TOKEN = "refreshToken",
-    WORKSPACE = "workspaces"
+export enum InvitationStatus {
+    PENDING = "PENDING",
+    ACCEPTED = "ACCEPTED",
+    DECLINED = "DECLINED"
 }
 

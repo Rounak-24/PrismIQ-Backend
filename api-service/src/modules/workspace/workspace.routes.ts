@@ -8,17 +8,16 @@ import {
     getWorkspaceMembersHandler,
     updateWorkspaceMemberHandler,
     delWorkspaceMemberHandler,
-    joinWorkspaceHandler
-    
+    leaveWorkspaceHandler
 } from "./workspace.controllers"
 
 export const workspaceRouter = Router()
 
 workspaceRouter.post("/", jwtAuthMiddleware, createWorkspaceHandler)
 workspaceRouter.delete("/:workspaceId", jwtAuthMiddleware, delWorkspaceHandler)
+workspaceRouter.put("/users", jwtAuthMiddleware, updateWorkspaceMemberHandler)
 workspaceRouter.put("/:workspaceId", jwtAuthMiddleware, updateWorkspaceHandler)
 workspaceRouter.post("/invite", jwtAuthMiddleware, sendInviteEmailHandler)
 workspaceRouter.get("/:workspaceId/members", jwtAuthMiddleware, getWorkspaceMembersHandler)
-workspaceRouter.put("/users", jwtAuthMiddleware, updateWorkspaceMemberHandler)
-workspaceRouter.get("/users/delete", jwtAuthMiddleware, delWorkspaceMemberHandler)
-workspaceRouter.post("/workspace/:workspaceId/join", jwtAuthMiddleware, joinWorkspaceHandler)
+workspaceRouter.post("/users/delete", jwtAuthMiddleware, delWorkspaceMemberHandler)
+workspaceRouter.post("/leave/:workspaceId", jwtAuthMiddleware, leaveWorkspaceHandler)
