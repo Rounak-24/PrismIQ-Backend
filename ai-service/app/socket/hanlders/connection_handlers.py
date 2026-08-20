@@ -2,8 +2,6 @@ import socketio
 from app.config.redis import redis
 from app.services.dataset_services import delete_dataset
 
-def getKey(session_id:str):
-    return f"{session_id}:dataset_id"
 
 async def join_session_handler(sio:socketio.AsyncServer, data, sid):
     session_id = data.get("sessionId")
@@ -21,7 +19,7 @@ async def join_session_handler(sio:socketio.AsyncServer, data, sid):
 
 async def leave_session_handler(sio:socketio.AsyncServer, data, sid):
     session_id = data.get("sessionId")
-        
+
     if not session_id:
         print(f"join_session failed: Missing sessionId from {sid}")
         await sio.emit("error", {
@@ -29,12 +27,18 @@ async def leave_session_handler(sio:socketio.AsyncServer, data, sid):
         })
         return
 
-    dataset_id = await redis.get(getKey(session_id))
+    from app.socket.hanlders.file_chat import get_key
 
-    if dataset_id is not None:
-        await delete_dataset(dataset_id)
+    dataset = await redis.hgetall(get_key(session_id))
 
-        await redis.delete(getKey(session_id))
+    if dataset is not None:
+        try:
+            await redis.delete(get_key(session_id))
+        except Exception as e:
+            print("Sonethig went wrong while deleting cached dataset_id & schema_context....", e)
+        finally: delete_dataset(dataset.get("dataset_id"))
+
+        print("dumped duckdb and cached dataset_id & schema_context has been deleted")
 
     await sio.leave_room(sid, room = session_id)
     print(f"Client {sid} left room: {session_id}")

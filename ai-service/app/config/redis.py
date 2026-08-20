@@ -7,7 +7,8 @@ REDIS_URL = getenv("REDIS_URL")
 
 redis = Redis(
     host = "localhost",
-    port = 6379
+    port = 6379,
+    decode_responses = True
 )
 
 pubsub = redis.pubsub()

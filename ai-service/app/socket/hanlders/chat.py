@@ -18,14 +18,14 @@ async def send_message_handler(sid, socket_data, sio:socketio.AsyncServer):
         if not session_id or not text:
             await sio.emit("error", {
                 "message":f"send_message failed: Missing payload properties from {sid}"
-            })
+            }, to=sid)
             print(f"send_message failed: Missing payload properties from {sid}")
             return
 
         if (data_source!="workspace"): 
             await sio.emit("error", {
                 "message":f"send_message failed: This is not ai_chat_handler socket"
-            })
+            }, to=sid)
             print(f"send_message failed: This is not ai_chat_handler socket, for {sid}")
             return
 
@@ -46,11 +46,11 @@ async def send_message_handler(sid, socket_data, sio:socketio.AsyncServer):
         print(f"job added to queue for session_id: {session_id}")
         await sio.emit("job_enqueued", 
             data = { "jobId": job_id}, 
-            room = session_id
+            to = sid
         )
 
     except Exception as e:
         print("Error occured in send_message_handler", e)
         await sio.emit("error",{
             "message":"Something went wrong in chat_handler or Query Processing"
-        })
+        }, to=sid)

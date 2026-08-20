@@ -118,11 +118,11 @@ async def download_and_dump(supabase_file_path:str)-> DumpedDBoutput:
     return dumped_data
 
 
-async def delete_dataset(dataset_id:str):
+def delete_dataset(dataset_id:str):
     db_dir = "./data/datasets"
     dataset_path = os.path.join(db_dir, f"{dataset_id}.duckdb")
 
-    await os.remove(dataset_path)
+    if os.path.exists(dataset_path): os.remove(dataset_path)
 
 
 async def execute_sql_in_org_db(sql:str):

@@ -9,7 +9,7 @@ async def broadcast_ai_response(sio:socketio.AsyncServer, response:MessageModel)
         session_id = response.sessionId
 
         await sio.emit("receive_message", data=ai_response_json, room = session_id)
-        print(f"Broadcasted AI response to room {session_id}")
+        print(f"Broadcasted message to room {session_id}")
 
     except Exception as e:
         print(f"Error occured in broadcast_ai_response while sending response to client,{e}")

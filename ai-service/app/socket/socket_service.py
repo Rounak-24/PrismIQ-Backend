@@ -51,16 +51,18 @@ class SockerService:
 
 
         @self.sio.on("send_file_message")
-        async def send_file_message_handler(sid, data:SocketData):
+        async def send_file_message_handler(sid, data):
             await file_chat_handler(
                 sio = self.sio,
                 sid = sid,
-                socket_data = data
+                data = data
             )
 
     async def send_error_event(self, session_id:str, err):
         sio = self.sio
         await sio.emit(event = "error", data = {
-            "message":str(err)
+            "success":False,
+            "message":"Something went wrong in socket_service....",
+            "code":"BACKEND_ERROR"
         }, room = session_id)
-        print("Error event sent")
+        print("Error event sent", err)

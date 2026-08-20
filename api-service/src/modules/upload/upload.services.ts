@@ -56,7 +56,7 @@ export const createUpload = async (file:Express.Multer.File,
 
 
 export const getUploads = async (workspaceId:string)=>{
-    return await prisma.fileUpload.findMany({
+    const uploads = await prisma.fileUpload.findMany({
         where: { workspaceId: workspaceId },
         select:{
             id: true,
@@ -64,7 +64,90 @@ export const getUploads = async (workspaceId:string)=>{
             uploadedBy: true,
             size: true,
             format: true,
-            supabaseFilePath: true
+            supabaseFilePath: true,
+            createdAt: true,
+            conversation:{
+                select:{
+                    id: true
+                }
+            }
+        }
+    })
+
+    return uploads.map((upload)=>{
+        return{
+            id: upload.id,
+            filename: upload.filename,
+            uploadedBy: upload.uploadedBy,
+            size: upload.size,
+            format: upload.format,
+            supabaseFilePath: upload.supabaseFilePath,
+            createdAt: upload.createdAt,
+            conversationId: upload.conversation?.id
+        }
+    })
+}
+
+
+export const delFileFromSupabase = async (supabaseFilePath:string)=>{
+    const bucket = env.SUPABASE_BUCKET as string
+    console.log(`File has been deleted from supabase`)
+    return await supabase.storage.from(bucket).remove([supabaseFilePath])
+}
+
+export const delFile = async (fileUploadId:string)=>{
+    return await prisma.$transaction(async (tx)=>{
+        const file = await tx.fileUpload.delete({
+            where: { id:fileUploadId },
+            select: { 
+                supabaseFilePath: true,
+                conversation:{
+                    select: { id:true }
+                }
+            }
+        }) 
+
+        const conversationId = file.conversation?.id;
+
+        if (conversationId) {
+            await tx.conversation.deleteMany({ 
+                where: { id: conversationId } 
+            });
+        }
+
+        return {
+            supabaseFilePath: file.supabaseFilePath
+        }
+    })
+}
+
+
+export const startFileConv = async (fileUploadId:string, title:string, workspaceId:string)=>{
+    return await prisma.$transaction(async (tx)=>{
+        const createConv = await tx.conversation.create({
+            data:{
+                title: title,
+                workspaceId: workspaceId,
+                fileuploadId: fileUploadId
+            },
+            select:{
+                id: true
+            }
+        })
+        console.log(`conv created, id: ${createConv.id}`)
+        await tx.fileUpload.update({
+            where: { id: fileUploadId },
+            data:{
+                conversation:{
+                    connect:{
+                        id: createConv.id
+                    }
+                }
+            }
+        })
+
+        return {
+            conversationId: createConv.id
         }
     })
 }
