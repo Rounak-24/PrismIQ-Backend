@@ -1,7 +1,6 @@
 import express from "express"
 import cors from "cors"
 import type { Express, Request, Response } from "express"
-import { env } from "node:process"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -16,7 +15,7 @@ import { invitationRouter } from "./modules/invite/invite.routes.js"
 export const app:Express = express()
 
 export const corsOptions = {
-    origin:env.CORS_ORIGIN,
+    origin:process.env.CORS_ORIGIN,
     credentials:true
 }
 

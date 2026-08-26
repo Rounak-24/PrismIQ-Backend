@@ -1,6 +1,6 @@
-import { sendEmail } from "../../services/mail.services"
+import { sendEmail } from "../../services/mail.services.js"
 import { Job, Worker } from "bullmq"
-import { redis } from "../../config/redis"
+import { redis } from "../../config/redis.js"
 
 
 export const initQueueWorker = ()=>{

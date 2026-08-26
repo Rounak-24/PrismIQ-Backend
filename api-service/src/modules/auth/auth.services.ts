@@ -1,9 +1,8 @@
 import jwt, { type SignOptions, type Secret } from "jsonwebtoken"
 import { prisma } from "../../config/prisma.js"
-import { env } from "node:process"
 import { redis } from "../../config/redis.js"
 import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue.js"
-import { getVerifyEmailHTML, getPassResetOtpHTML } from "../../view/email.viewes"
+import { getVerifyEmailHTML, getPassResetOtpHTML } from "../../view/email.viewes.js"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 
@@ -41,15 +40,15 @@ export const generateTokens = (id:string, name:string, email:string)=>{
     const accessToken = jwt.sign({
         id, email, name
 
-    },env.JWT_SECRET_KEY as Secret, {
-        expiresIn: env.ACCESS_TOKEN_EXPIRY
+    },process.env.JWT_SECRET_KEY as Secret, {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
     } as SignOptions)
 
     const refreshToken = jwt.sign({
         id, email
 
-    },env.JWT_SECRET_KEY as Secret, {
-        expiresIn: env.REFRESH_TOKEN_EXPIRY
+    },process.env.JWT_SECRET_KEY as Secret, {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
     } as SignOptions)
 
     return {accessToken, refreshToken}

@@ -1,6 +1,6 @@
 import { Queue } from "bullmq"
-import { redis } from "../../config/redis"
-import { type IEmailOptionObj } from "../../services/mail.services"
+import { redis } from "../../config/redis.js"
+import { type IEmailOptionObj } from "../../services/mail.services.js"
 
 export enum emailQueueJob{
     SEND_VERIFY_EMAIL = "send-verify-email",

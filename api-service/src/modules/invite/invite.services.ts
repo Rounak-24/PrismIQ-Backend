@@ -1,5 +1,5 @@
-import { prisma } from "../../config/prisma"
-import { InvitationStatus, workRole } from "../../types/enums"
+import { prisma } from "../../config/prisma.js"
+import { InvitationStatus, workRole } from "../../types/enums.js"
 
 
 export const getSentInvites = async (userId:string, workspaceId:string)=>{

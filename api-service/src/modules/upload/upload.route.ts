@@ -1,12 +1,12 @@
 import { Router } from "express"
-import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
-import { uploader } from "./multer.middleware"
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware.js'
+import { uploader } from "./multer.middleware.js"
 import {
     fileUploadHandler,
     getUploadsHandler,
     delFileUploadHandler,
     startFileConvHandler
-} from "./upload.controller"
+} from "./upload.controller.js"
 
 export const uploadRouter = Router()
 

@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware.js'
 import { 
     getChatSessionHandler,
     delChatSessionHandler,
@@ -7,8 +7,7 @@ import {
     createChatHandler,
     updateChatTitleHandler
 
-} from "./chat.controllers"
-import { updateChatTitle } from "./chat.services";
+} from "./chat.controllers.js"
 
 
 export const chatRouter = Router()

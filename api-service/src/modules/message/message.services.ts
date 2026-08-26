@@ -1,5 +1,5 @@
-import { prisma } from "../../config/prisma"
-import type { IMessage } from "../../types/interfaces";
+import { prisma } from "../../config/prisma.js"
+import type { IMessage } from "../../types/interfaces.js";
 
 
 export const saveMessage = async (data:IMessage)=>{

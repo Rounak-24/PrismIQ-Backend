@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware.js'
 import {
     delWorkspaceHandler,
     updateWorkspaceHandler,
@@ -9,7 +9,7 @@ import {
     updateWorkspaceMemberHandler,
     delWorkspaceMemberHandler,
     leaveWorkspaceHandler
-} from "./workspace.controllers"
+} from "./workspace.controllers.js"
 
 export const workspaceRouter = Router()
 

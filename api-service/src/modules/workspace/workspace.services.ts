@@ -1,7 +1,7 @@
-import { prisma } from "../../config/prisma"
-import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue"
-import { getInviteUserHTML } from "../../view/email.viewes"
-import { workRole, userStatus } from "../../types/enums"
+import { prisma } from "../../config/prisma.js"
+import { addEmailJob, emailQueueJob } from "../../queues/email/email.queue.js"
+import { getInviteUserHTML } from "../../view/email.viewes.js"
+import { workRole, userStatus } from "../../types/enums.js"
 
 export enum userInWorkspaceStatus {
     PRESENT_WITH_CURR_ROLE = "PRESENT_WITH_CURR_ROLE",

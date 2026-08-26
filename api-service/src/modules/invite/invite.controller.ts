@@ -1,9 +1,8 @@
 import type { Request, Response } from "express";
-import { asyncHandler } from "../../utils/asyncHandler";
-import { ApiError } from "../../utils/ApiError";
-import { ApiResponse } from "../../utils/ApiResponse";
-import { getJoinedHTML } from "../../view/response.view";
-import { env } from "node:process"
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponse } from "../../utils/ApiResponse.js";
+import { getJoinedHTML } from "../../view/response.view.js";
 
 import { 
     acceptInviteAndCreateRole, 
@@ -11,7 +10,7 @@ import {
     delSentInvites, 
     getRecievedInvites, 
     getSentInvites 
-} from "./invite.services";
+} from "./invite.services.js";
 
 
 export const getSentInvitesHandler = asyncHandler(async (req:Request, res:Response)=>{
@@ -70,6 +69,6 @@ export const acceptInvitationFromEmail = asyncHandler(async (req:Request, res:Re
     const workspace = await acceptInviteAndCreateRole(invitationId, sentToId)
     if(!workspace) throw new ApiError(500, "Something went wrong while joining workspace")
 
-    const reeponseHTML = getJoinedHTML(env.APP_URL as string, workspace.title)
+    const reeponseHTML = getJoinedHTML(process.env.APP_URL as string, workspace.title)
     return res.status(200).send(reeponseHTML)
 })

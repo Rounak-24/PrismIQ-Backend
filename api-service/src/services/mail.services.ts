@@ -1,7 +1,6 @@
 import { Resend } from "resend"
-import { env } from "node:process"
-import { config } from "dotenv"
-config()
+import dotenv from "dotenv"
+dotenv.config()
 
 export interface IEmailOptionObj {
     mailHTML: string
@@ -10,12 +9,12 @@ export interface IEmailOptionObj {
 }
 
 
-export const resend = new Resend(env.RESEND_API_KEY)
+export const resend = new Resend(process.env.RESEND_API_KEY as string)
 
 export const sendEmail = async (options:IEmailOptionObj)=>{
     try{
         const { data, error } = await resend.emails.send({
-            from: env.ORG_EMAIL as string,
+            from: process.env.ORG_EMAIL as string,
             to: [options.email],
             subject: options.subject,
             html: options.mailHTML,

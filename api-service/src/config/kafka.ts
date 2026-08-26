@@ -1,5 +1,6 @@
 import { Kafka, logLevel } from "kafkajs"
-import { env } from "node:process"
+import dotenv from "dotenv"
+dotenv.config()
 
 // export const kafka = new Kafka({
 //     clientId:process.env.KAFKA_CLIENT || "localhost-client",
@@ -12,15 +13,15 @@ import { env } from "node:process"
 // })
 
 export const kafka = new Kafka({
-    clientId:env.KAFKA_CLIENT_ID as string,
-    brokers:[`${env.KAFKA_HOST}:${env.KAFKA_PORT}`],
+    clientId:process.env.KAFKA_CLIENT_ID as string,
+    brokers:[`${process.env.KAFKA_HOST}:${process.env.KAFKA_PORT}`],
     ssl:{
         rejectUnauthorized: false
     },
     sasl:{
         mechanism:'plain',
-        username:env.KAFKA_USERNAME as string,
-        password:env.KAFKA_PASSWORD as string
+        username:process.env.KAFKA_USERNAME as string,
+        password:process.env.KAFKA_PASSWORD as string
     },
     logLevel: logLevel.INFO,
     retry: {

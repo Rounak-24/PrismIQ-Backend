@@ -1,4 +1,4 @@
-import {type messageSender } from "./enums"
+import {type messageSender } from "./enums.js"
 
 export interface IMessage{
     sessionId:      string

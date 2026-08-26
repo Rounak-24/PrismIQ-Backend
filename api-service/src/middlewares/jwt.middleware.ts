@@ -1,6 +1,5 @@
 import jwt, {type Secret} from "jsonwebtoken"
 import type {Request, Response, NextFunction} from "express"
-import {env} from "node:process"
 
 interface IjwtPayload{
     email: string,
@@ -22,7 +21,7 @@ export const jwtAuthMiddleware = (req:Request, res:Response, next:NextFunction)=
         if(!auth) return res.status(401).json({"error":"Unauthorised request"})
 
         const token:string = auth.split(' ')[1]
-        const decoded = jwt.verify(token, env.JWT_SECRET_KEY as Secret) as IjwtPayload
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as Secret) as IjwtPayload
 
         const user = {
             id: decoded.id,

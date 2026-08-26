@@ -1,5 +1,5 @@
-import { prisma } from "../../config/prisma"
-import type { IDashboard } from "../../types/interfaces";
+import { prisma } from "../../config/prisma.js"
+import type { IDashboard } from "../../types/interfaces.js"
 
 
 export const saveDashboard = async (workspaceId:string, data:IDashboard)=>{

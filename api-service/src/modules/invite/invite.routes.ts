@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtAuthMiddleware } from "../../middlewares/jwt.middleware"
+import { jwtAuthMiddleware } from "../../middlewares/jwt.middleware.js"
 import { 
     delSentInvite, 
     getRecievedInvitesHandler, 
@@ -7,7 +7,7 @@ import {
     declineInvitationHandler,
     acceptInvitationHandler, 
     acceptInvitationFromEmail
-} from "./invite.controller";
+} from "./invite.controller.js";
 
 export const invitationRouter = Router()
 

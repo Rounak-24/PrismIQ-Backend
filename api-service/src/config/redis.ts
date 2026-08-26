@@ -1,9 +1,8 @@
 import { Redis } from "ioredis"
-import { env } from "node:process"
-import { config } from "dotenv"
-config()
+import dotenv from "dotenv"
+dotenv.config()
 
-export const redis = new Redis(env.REDIS_URL as string, {
+export const redis = new Redis(process.env.REDIS_URL as string, {
     maxRetriesPerRequest:null
 })
 

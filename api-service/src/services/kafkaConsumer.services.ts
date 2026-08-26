@@ -1,7 +1,7 @@
-import { kafka } from "../config/kafka"
-import { KAFKA_QUERY_TOPIC } from "../types/constants"
-import { type IMessage } from "../types/interfaces"
-import { saveMessage } from "../modules/message/message.services"
+import { kafka } from "../config/kafka.js"
+import { KAFKA_QUERY_TOPIC } from "../types/constants.js"
+import { type IMessage } from "../types/interfaces.js"
+import { saveMessage } from "../modules/message/message.services.js"
 
 export const startMessageConsumer = async ()=>{
     const consumer = kafka.consumer({

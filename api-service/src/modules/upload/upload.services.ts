@@ -1,8 +1,7 @@
 import fs from "fs"
 import crypto from "crypto"
-import { prisma } from "../../config/prisma"
-import { env } from "node:process"
-import { supabase } from "../../config/supabase"
+import { prisma } from "../../config/prisma.js"
+import { supabase } from "../../config/supabase.js"
 
 export const uploadFileToSupabase = async (file:Express.Multer.File, workspaceId:string)=>{
     try{
@@ -14,7 +13,7 @@ export const uploadFileToSupabase = async (file:Express.Multer.File, workspaceId
         const supabaseFileName = `workspace-${workspaceId}/${supabaseId}-${originalFilename}`
 
         const fileBuffer = fs.readFileSync(localFilapath)
-        const bucket = env.SUPABASE_BUCKET as string
+        const bucket = process.env.SUPABASE_BUCKET as string
         
         const { data, error } = await supabase.storage
             .from(bucket)
@@ -90,7 +89,7 @@ export const getUploads = async (workspaceId:string)=>{
 
 
 export const delFileFromSupabase = async (supabaseFilePath:string)=>{
-    const bucket = env.SUPABASE_BUCKET as string
+    const bucket = process.env.SUPABASE_BUCKET as string
     console.log(`File has been deleted from supabase`)
     return await supabase.storage.from(bucket).remove([supabaseFilePath])
 }

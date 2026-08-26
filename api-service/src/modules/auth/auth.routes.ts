@@ -1,5 +1,5 @@
 import { Router } from "express"
-import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware'
+import { jwtAuthMiddleware } from '../../middlewares/jwt.middleware.js'
 import {
     registerHandler,
     loginHandler,
