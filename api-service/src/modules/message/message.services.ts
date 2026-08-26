@@ -44,8 +44,7 @@ export const saveMessage = async (data:IMessage)=>{
                 }
             })
         }
-
-        console.log(savedMessage)
+        // console.log(savedMessage)
         if (savedMessage) return true
         else return false
 

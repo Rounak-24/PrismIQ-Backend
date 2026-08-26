@@ -10,15 +10,17 @@ export enum userInWorkspaceStatus {
 }
 
 
-export const createWorkspace = async (title:string, userId:string)=>{
+export const createWorkspace = async (title:string, fullname:string, userId:string)=>{
     const workspace = await prisma.workspace.create({
         data:{
             title,
-            createdBy:userId,
+            createdBy:fullname,
             userRoles:{
                 create:{
-                    userId,
-                    workRole: workRole.ADMIN
+                    workRole: workRole.ADMIN,
+                    workspaceUser:{
+                        connect:{ id: userId }
+                    }
                 }
             }
         },

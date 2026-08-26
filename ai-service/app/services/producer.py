@@ -32,7 +32,7 @@ async def produce_mesage(message_data:MessageModel):
         producer:AIOKafkaProducer = await get_producer()
         await producer.send_and_wait(KAFKA_QUERY_TOPIC, kafka_message_bytes)
         
-        print(f"Message prodeced to kafka, session_id:{ message_data.sessionId }, time:{message_data.sentAt}")
+        print(f"Message produced to kafka, session_id:{ message_data.sessionId }, time:{message_data.sentAt}")
 
     except Exception as e:
         print(f" Error while producing message, {e}")

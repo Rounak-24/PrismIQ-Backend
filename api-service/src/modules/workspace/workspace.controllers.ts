@@ -29,7 +29,7 @@ export const createWorkspaceHandler = asyncHandler(async (req:Request, res:Respo
     
     if(!title) throw new ApiError(400, "Workspace title is required")
     
-    const workspace = await createWorkspace(title, fullname)
+    const workspace = await createWorkspace(title, fullname, id)
     if(!workspace) throw Error("Something went wrong while creating workspace....")
 
     return res.status(200).json(

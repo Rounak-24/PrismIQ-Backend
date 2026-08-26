@@ -7,7 +7,10 @@ config()
 const PrismaClientSingleton = ()=>{
     const connectionString = process.env.DIRECT_URL
     const pool = new Pool({
-        connectionString : connectionString
+        connectionString : connectionString,
+        ssl: {
+            rejectUnauthorized: true, 
+        },
     })
     const adapter = new PrismaPg(pool)
 
