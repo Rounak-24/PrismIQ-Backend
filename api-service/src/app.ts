@@ -15,8 +15,9 @@ import { invitationRouter } from "./modules/invite/invite.routes.js"
 export const app:Express = express()
 
 export const corsOptions = {
-    origin:process.env.CORS_ORIGIN,
-    credentials:true
+    origin:"*",
+    // origin:process.env.CORS_ORIGIN,
+    // credentials:true
 }
 
 const logRequest = (req: Request, res: Response, next:Function)=>{

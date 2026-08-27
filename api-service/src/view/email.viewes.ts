@@ -6,7 +6,7 @@ export const getInviteUserHTML =
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>You've Been Invited to Join MKTG.AI</title>
+            <title>You've Been Invited to Join</title>
             </head>
             <body style="margin: 0; padding: 0; background-color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color: #94a3b8;">
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0f172a; padding: 40px 20px;">
@@ -20,10 +20,10 @@ export const getInviteUserHTML =
                         <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                             <tr>
                             <td style="background-color: #4f46e5; border-radius: 8px; width: 40px; height: 40px; text-align: center; vertical-align: middle;">
-                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">M</span>
+                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">Q</span>
                             </td>
                             <td style="padding-left: 12px; text-align: left; vertical-align: middle;">
-                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">MKTG<span style="color: #818cf8;">.AI</span></span>
+                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">Prism<span style="color: #818cf8;">.IQ</span></span>
                             </td>
                             </tr>
                         </table>
@@ -43,7 +43,7 @@ export const getInviteUserHTML =
                         
                         <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 24px; color: #cbd5e1; font-weight: 500;">
                             <strong>${sender}</strong> has invited you to join the marketing analytics workspace 
-                            <span style="color: #818cf8; font-weight: 700;">${workspaceName}</span> on MKTG.AI.
+                            <span style="color: #818cf8; font-weight: 700;">${workspaceName}</span> on PrismIQ.
                         </p>
                         
                         <p style="margin: 0 0 32px 0; font-size: 14px; line-height: 24px; color: #cbd5e1; font-weight: 500;">
@@ -60,18 +60,6 @@ export const getInviteUserHTML =
                             </td>
                             </tr>
                         </table>
-
-                        <!-- Verification Details -->
-                        <p style="margin: 0 0 16px 0; font-size: 12px; line-height: 20px; color: #64748b; font-weight: 500;">
-                            If the button above does not work, please copy and paste the following URL into your web browser:
-                        </p>
-                        
-                        <div style="background-color: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; word-break: break-all; margin-bottom: 24px;">
-                            <a href="${acceptUrl}" target="_blank" style="color: #818cf8; font-size: 11px; font-family: monospace; text-decoration: none; font-weight: 600;">
-                            ${acceptUrl}
-                            </a>
-                        </div>
-                        </td>
                     </tr>
 
                     <!-- Footer Section -->
@@ -116,10 +104,10 @@ export const getPassResetOtpHTML = (otpCode:string)=>{
                         <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                             <tr>
                             <td style="background-color: #4f46e5; border-radius: 8px; width: 40px; height: 40px; text-align: center; vertical-align: middle;">
-                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">M</span>
+                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">Q</span>
                             </td>
                             <td style="padding-left: 12px; text-align: left; vertical-align: middle;">
-                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">MKTG<span style="color: #818cf8;">.AI</span></span>
+                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">Prism<span style="color: #818cf8;">.IQ</span></span>
                             </td>
                             </tr>
                         </table>
@@ -205,10 +193,10 @@ export const getVerifyEmailHTML = (name:string, verifyUrl:string)=>{
                         <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                             <tr>
                             <td style="background-color: #4f46e5; border-radius: 8px; width: 40px; height: 40px; text-align: center; vertical-align: middle;">
-                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">M</span>
+                                <span style="color: #ffffff; font-size: 20px; font-weight: 900; line-height: 40px; font-family: sans-serif;">Q</span>
                             </td>
                             <td style="padding-left: 12px; text-align: left; vertical-align: middle;">
-                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">MKTG<span style="color: #818cf8;">.AI</span></span>
+                                <span style="font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.5px;">Prism<span style="color: #818cf8;">.IQ</span></span>
                             </td>
                             </tr>
                         </table>
@@ -227,7 +215,7 @@ export const getVerifyEmailHTML = (name:string, verifyUrl:string)=>{
                         </p>
                         
                         <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 24px; color: #cbd5e1; font-weight: 500;">
-                            Thank you for creating an account on Prisma AI! To complete your registration and activate your dashboard access, please confirm your email address by clicking the button below.
+                            Thank you for creating an account on PrismIQ! To complete your registration and activate your dashboard access, please confirm your email address by clicking the button below.
                         </p>
 
                         <!-- Call to Action -->
@@ -240,22 +228,6 @@ export const getVerifyEmailHTML = (name:string, verifyUrl:string)=>{
                             </td>
                             </tr>
                         </table>
-
-                        <!-- Verification Details -->
-                        <p style="margin: 0 0 16px 0; font-size: 12px; line-height: 20px; color: #64748b; font-weight: 500;">
-                            If the button above does not work, please copy and paste the following URL into your web browser:
-                        </p>
-                        
-                        <div style="background-color: #0f172a; border: 1px solid #334155; padding: 12px; border-radius: 8px; word-break: break-all; margin-bottom: 24px;">
-                            <a href="${verifyUrl}" target="_blank" style="color: #818cf8; font-size: 11px; font-family: monospace; text-decoration: none; font-weight: 600;">
-                            ${verifyUrl}
-                            </a>
-                        </div>
-
-                        <p style="margin: 0; font-size: 12px; line-height: 20px; color: #64748b; font-weight: 500;">
-                            * This verification link will expire in 24 hours.
-                        </p>
-                        </td>
                     </tr>
 
                     <!-- Footer Section -->
@@ -265,7 +237,7 @@ export const getVerifyEmailHTML = (name:string, verifyUrl:string)=>{
                             Prisma AI Analytics Platform
                         </p>
                         <p style="margin: 0; font-size: 11px; color: #475569; font-weight: 500; line-height: 16px;">
-                            If you did not sign up for an account on Prisma AI, you can safely ignore or delete this email.
+                            If you did not sign up for an account on Prism AI, you can safely ignore or delete this email.
                         </p>
                         </td>
                     </tr>
