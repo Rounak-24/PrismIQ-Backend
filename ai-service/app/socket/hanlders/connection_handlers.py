@@ -31,7 +31,7 @@ async def leave_session_handler(sio:socketio.AsyncServer, data, sid):
 
     dataset = await redis.hgetall(get_key(session_id))
 
-    if (len(dataset) == 0):
+    if (len(dataset) != 0):
         try:
             await redis.delete(get_key(session_id))
         except Exception as e:
