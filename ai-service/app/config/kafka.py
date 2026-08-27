@@ -1,6 +1,8 @@
 from aiokafka import AIOKafkaProducer
+from dotenv import load_dotenv
 import os
 import ssl
+load_dotenv()
 
 producer:AIOKafkaProducer = None
 
